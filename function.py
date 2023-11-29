@@ -38,15 +38,3 @@ def NLL(lamb, m):
     sum = lamb - term2 + term3
 
     return 2*np.sum(sum)
-
-
-def cal_x3(x0, x1, x2, y0, y1, y2):
-    """
-    Calculate second order Lagrange polynomial minimum
-    """
-
-    numer = (x2**2-x1**2)*y0 + (x0**2-x2**2)*y1 + (x1**2-x0**2)*y2
-    denom = (x2-x1)*y0 + (x0-x2)*y1 + (x1-x0)*y2
-    x3 = (1/2) * (numer/denom)
-
-    return x3
