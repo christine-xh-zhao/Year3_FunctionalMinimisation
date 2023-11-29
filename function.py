@@ -3,6 +3,7 @@ Functions
 """
 
 import numpy as np
+import scipy as sp
 
 
 def neutrino_prob(E, theta=(np.pi)/4, del_m=np.sqrt(2.4e-3), L=295):
@@ -19,8 +20,21 @@ def neutrino_prob(E, theta=(np.pi)/4, del_m=np.sqrt(2.4e-3), L=295):
     sin1 = np.sin(2 * theta)
     term = (1.267 * del_m**2 * L) / E
     sin2 = np.sin(term)
+
     return 1 - ((sin1**2)*(sin2**2))
 
 
-def NLL():
-    return 0
+def NLL(lamb, m):
+    """
+    Calculate negative log likelihood
+
+    Args:
+    - lamb -- the expected average number
+    - m -- observed number of neutrino events in bin i.
+    """
+
+    term2 = m * np.log(lamb)
+    term3 = np.log(sp.special.factorial(m))
+    sum = lamb - term2 + term3
+
+    return 2*np.sum(sum)

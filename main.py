@@ -50,3 +50,29 @@ if plot:
     plt.show()
 
 # NLL against theta
+num = 70  # number of values to generate
+theta_max = np.pi
+theta_min = 0
+theta_step = (theta_max - theta_min)/num
+theta_list = np.arange(theta_min, theta_max, theta_step)  # list of theta values
+
+nll_list = []
+for i in range(num):
+    theta = theta_list[i]
+    prob = fc.neutrino_prob(E=energy, theta=theta)
+    data_unosc_prob = data_unosc*prob
+    nll = fc.NLL(lamb=data_unosc_prob, m=data_osc)
+    nll_list += [nll]
+
+nll_list = np.array(nll_list)
+
+fig = plt.figure()
+plt.plot(theta_list, nll_list, '.')
+plt.ylabel('NLL')
+plt.xlabel('theta')
+# plt.show()
+
+# 1D minimisor
+indices = (nll_list.argsort()[:6])  # extra indices of the three points around each minimum (total two minima)
+indices = np.sort(indices)
+print(indices)
