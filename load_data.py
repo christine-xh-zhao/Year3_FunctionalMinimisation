@@ -6,36 +6,49 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-plot = True
 
-# load data
-df = pd.read_csv('data_cz2421.txt', sep=" ", header=None)
+class LoadData():
 
-data_osc = np.array(df[0][1:201].astype(float))  # number of oscillated data in each bin
-data_unosc = np.array(df[0][202:].astype(float))  # ... non-oscillated data ...
+    def __init__(self):
+        pass
 
-width = 0.05  # bin width
-energy = np.arange(0.025, 10, width)  # bin centre energy in GeV
+    def data_energy(self):
+        # load data
+        df = pd.read_csv('data_cz2421.txt', sep=" ", header=None)
 
-# plot
-if plot:
-    fig = plt.figure()
-    plt.bar(energy, data_osc, width, label='oscillated')
-    plt.ylabel('# of entries')
-    plt.xlabel('energy (GeV)')
-    plt.legend()
+        self.data_osc = np.array(df[0][1:201].astype(float))  # number of oscillated data in each bin
+        self.data_unosc = np.array(df[0][202:].astype(float))  # ... non-oscillated data ...
 
-    fig = plt.figure()
-    plt.bar(energy, data_unosc, width, label='unoscillated', color='C1')
-    plt.ylabel('# of entries')
-    plt.xlabel('energy (GeV)')
-    plt.legend()
+        self.width = 0.05  # bin width
+        self.energy = np.arange(0.025, 10, self.width)  # bin centre energy in GeV
 
-    fig = plt.figure()
-    plt.bar(energy, data_osc, width, label='oscillated')
-    plt.bar(energy, data_unosc, width, label='unoscillated', alpha=0.7)
-    plt.ylabel('# of entries')
-    plt.xlabel('energy (GeV)')
-    plt.legend()
+    def simple_plot(self, plot=False):
+        # plot
+        self.plot = plot
 
-    plt.show()
+        if self.plot:
+            fig = plt.figure()
+            plt.bar(self.energy, self.data_osc, self.width, label='oscillated')
+            plt.ylabel('# of entries')
+            plt.xlabel('energy (GeV)')
+            plt.legend()
+
+            fig = plt.figure()
+            plt.bar(self.energy, self.data_unosc, self.width, label='unoscillated', color='C1')
+            plt.ylabel('# of entries')
+            plt.xlabel('energy (GeV)')
+            plt.legend()
+
+            fig = plt.figure()
+            plt.bar(self.energy, self.data_unosc, self.width, label='unoscillated', color='C1')
+            plt.bar(self.energy, self.data_osc, self.width, label='oscillated', color='C0')
+            plt.ylabel('# of entries')
+            plt.xlabel('energy (GeV)')
+            plt.legend()
+
+            plt.show()
+
+    def get_data(self):
+        self.data_energy()
+        return self.data_osc, self.data_unosc, self.energy, self.width
+    
