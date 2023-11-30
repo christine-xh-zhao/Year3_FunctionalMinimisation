@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 import function as fc
 import load_data as ld
+import minimiser as mi
 
 plot = False
 
@@ -51,7 +52,7 @@ if plot:
 
 # NLL against theta
 num = 70  # number of values to generate
-theta_max = np.pi/2
+theta_max = (np.pi/2)/2  # full range/2 to exclue one minimum
 theta_min = 0
 theta_step = (theta_max - theta_min)/num
 theta_list = np.arange(theta_min, theta_max, theta_step)  # list of theta values
@@ -70,9 +71,7 @@ fig = plt.figure()
 plt.plot(theta_list, nll_list, '.')
 plt.ylabel('NLL')
 plt.xlabel('theta')
-plt.show()
+# plt.show()
 
 # 1D minimisor
-indices = (nll_list.argsort()[:6])  # extra indices of the three points around each minimum (total two minima)
-indices = np.sort(indices)
-print(indices)
+mi.Univariate().parabolic_1d(x_list=theta_list, y_list=nll_list)
