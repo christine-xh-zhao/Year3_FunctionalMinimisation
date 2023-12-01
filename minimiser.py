@@ -2,8 +2,9 @@
 Minimisers
 """
 
-import numpy as np
 import copy
+import random
+import numpy as np
 
 import load_data as ld
 import function as fc
@@ -17,17 +18,15 @@ class Univariate():
         self.data_osc = data_osc
         self.data_unosc = data_unosc
         self.energy = energy
-    
-    def min_indices(self, y_list, num):
-        """
-        Calculate the indices of the smallest num points
-        """
-        return y_list.argsort()[:num]
 
-    def cal_x3(self, x0, x1, x2, y0, y1, y2):
+
+    def cal_x3(self, x_list, y_list):
         """
         Calculate second order Lagrange polynomial to estimate x3
         """
+
+        x0, x1, x2 = x_list[0], x_list[1], x_list[2]
+        y0, y1, y2 = y_list[0], y_list[1], y_list[2]
 
         numer = (x2**2-x1**2)*y0 + (x0**2-x2**2)*y1 + (x1**2-x0**2)*y2
         denom = (x2-x1)*y0 + (x0-x2)*y1 + (x1-x0)*y2
@@ -47,47 +46,50 @@ class Univariate():
         return y3
 
 
-    def parabolic_1d(self, x_list, y_list):
+    def parabolic_1d(self, x_list, y_list, num_max=100, stop_cond=5e-6):
         """
         1D parabolic minimiser for neutrino_prob function
         """
 
         # inital values of the three points around first minimum
-        ind_min = self.min_indices(y_list, 1)
-        x0 = x_list[ind_min[0]]
-        y0 = y_list[ind_min[0]]
-        x1, x2 = x0 + x0/10, x0 - x0/10
-        y1, y2 = y0 + y0/10, y0 - y0/10
+        ind_min = np.argmin(y_list)
+        x0 = x_list[ind_min]
+        x1 = x0 + x0/100; x2 = x0 - x0/100
+
+        x_iter = [x0, x1, x2]
+        y_iter = [self.cal_y3(x) for x in x_iter]  
 
         # iterate
-        stop_cond = 1e-10
-        num_max = 100
         num = 1
-        y3 = 0
         while True:
-            x3 = self.cal_x3(x0, x1, x2, y0, y1, y2)
-            y3_new = self.cal_y3(x3)
+            
+            x3 = self.cal_x3(x_iter, y_iter)
+            y3 = self.cal_y3(x3)
 
-            if (y3_new - y3) <= stop_cond:
-                print(f'Stopping condition {stop_cond} reached at {num} iterations')
-                print(f'Minimum is x = {x3} y = {y3_new}')
+            if abs(x_iter[-1] - x3) <= stop_cond:
+                print(f'Stopping condition {stop_cond} reached after {num} iterations')
+                print(f'Minimum is x = {x3} y = {y3}')
                 break
 
-            x_list_new = np.array([x0, x1, x2, x3])
-            y_list_new = np.array([y0, y1, y2, y3_new])
+            x_iter.append(x3)
+            y_iter.append(y3)
 
-            ind_min3 = self.min_indices(y_list_new, 3)  # indices for min three points
+            # shuffle two lists with same order
+            temp = list(zip(x_iter, y_iter))
+            random.shuffle(temp)
+            x_iter, y_iter = zip(*temp)  # returns tuples
+            x_iter, y_iter = list(x_iter), list(y_iter)
 
-            # update
-            x0, x1, x2 = x_list_new[ind_min3[0]], x_list_new[ind_min3[1]], x_list_new[ind_min3[2]]
-            y0, y1, y2 = y_list_new[ind_min3[0]], y_list_new[ind_min3[1]], y_list_new[ind_min3[2]]
+            # remove max value and update array
+            ind_max = np.argmax(y_iter)
+            x_iter.pop(ind_max)
+            y_iter.pop(ind_max)
 
             if num >= num_max:
                 print(f'Max iterations {num_max} reached')
                 break
 
             num += 1
-            y3 = copy.deepcopy(y3_new)
 
-        return x3, y3_new
+        return x3, y3
     

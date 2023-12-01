@@ -52,7 +52,7 @@ if plot:
 
 # NLL against theta
 num = 70  # number of values to generate
-theta_max = (np.pi/2)/2  # full range/2 to exclue one minimum
+theta_max = (np.pi/2)  # full range/2 to exclue one minimum
 theta_min = 0
 theta_step = (theta_max - theta_min)/num
 theta_list = np.arange(theta_min, theta_max, theta_step)  # list of theta values
@@ -67,11 +67,21 @@ for i in range(num):
 
 nll_list = np.array(nll_list)
 
-fig = plt.figure()
-plt.plot(theta_list, nll_list, '.')
-plt.ylabel('NLL')
-plt.xlabel('theta')
-# plt.show()
+if plot:
+    fig = plt.figure()
+    plt.plot(theta_list, nll_list, '.')
+    plt.ylabel('NLL')
+    plt.xlabel('theta')
+    plt.show()
 
 # 1D minimisor
-mi.Univariate().parabolic_1d(x_list=theta_list, y_list=nll_list)
+print('-'*20)
+print('\n1D parabolic minimiser\n')
+theta_min, NLL_min = mi.Univariate().parabolic_1d(x_list=theta_list, y_list=nll_list)
+print('which x is theta and y is NLL')
+print('\nUse 1e-06 cannot converge after 100 iterations')
+
+# finding the accuracy
+theta_plus = theta_min + theta_min/100
+theta_minus = theta_min - theta_min/100
+theta_try = np.linspace(theta_minus, theta_plus, 500)
