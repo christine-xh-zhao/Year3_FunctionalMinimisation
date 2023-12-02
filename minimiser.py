@@ -10,7 +10,7 @@ import load_data as ld
 import function as fc
 
 
-class Univariate():
+class Minimiser():
 
     def __init__(self):
         data_osc, data_unosc, energy, width = ld.LoadData().get_data()  # energy (GeV) in each bin
@@ -22,7 +22,7 @@ class Univariate():
 
     def cal_x3(self, x_list, y_list):
         """
-        Calculate second order Lagrange polynomial to estimate x3
+        Use second order Lagrange polynomial to estimate x3
         """
 
         x0, x1, x2 = x_list[0], x_list[1], x_list[2]
@@ -34,16 +34,16 @@ class Univariate():
 
         return x3
 
-    def cal_y3(self, x3):
+    def cal_nll(self, theta):
         """
-        Calculate NLL from given theta x3
+        Calculate NLL from given theta
         """
 
-        prob = fc.neutrino_prob(E=self.energy, theta=x3)
+        prob = fc.neutrino_prob(E=self.energy, theta=theta)
         data_unosc_prob = self.data_unosc*prob
-        y3 = fc.NLL(lamb=data_unosc_prob, m=self.data_osc)
+        nll = fc.NLL(lamb=data_unosc_prob, m=self.data_osc)
 
-        return y3
+        return nll
 
 
     def parabolic_1d(self, x_list, y_list, num_max=100, stop_cond=5e-6):
@@ -57,14 +57,14 @@ class Univariate():
         x1 = x0 + x0/100; x2 = x0 - x0/100
 
         x_iter = [x0, x1, x2]
-        y_iter = [self.cal_y3(x) for x in x_iter]  
+        y_iter = [self.cal_nll(x) for x in x_iter]  
 
         # iterate
         num = 1
         while True:
             
             x3 = self.cal_x3(x_iter, y_iter)
-            y3 = self.cal_y3(x3)
+            y3 = self.cal_nll(x3)
 
             if abs(x_iter[-1] - x3) <= stop_cond:
                 print(f'Stopping condition {stop_cond} reached after {num} iterations')
@@ -85,7 +85,7 @@ class Univariate():
             x_iter.pop(ind_max)
             y_iter.pop(ind_max)
 
-            if num >= num_max:
+            if num == num_max:
                 print(f'Max iterations {num_max} reached')
                 break
 
