@@ -110,7 +110,7 @@ def gradient(f, x):
         gradient.append((f2 - f1)/(2*h))
 
         x[i] = xx  # restore x[i]
-    return np.array(gradient).reshape(x.shape)
+    return np.array(gradient)
 
 
 def hessian(func, x):
@@ -134,7 +134,7 @@ def hessian(func, x):
         grad2 = gradient(func, x)
 
         # calculate gradient
-        hessian[:, i] = ((grad2 - grad1)/(2*h)).reshape(x.shape[0])
+        hessian[i, :] = ((grad2 - grad1)/(2*h))
 
         x[i] = xx  # restore x[i]
 

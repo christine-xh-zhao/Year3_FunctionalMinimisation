@@ -84,19 +84,20 @@ class Minimiser():
         # inital values of the three points around first minimum
         ind_min = np.argmin(y_list)
         x0 = x_list[ind_min]
-        x1 = x0 + x0/100; x2 = x0 - x0/100
+        x1 = x0 + x0/50; x2 = x0 - x0/50
 
         x_iter = [x0, x1, x2]
         y_iter = [self.cal_nll(x) for x in x_iter]  
 
         # iterate
         num = 1
+        y3_old = 0
         while True:
             
             x3 = self.cal_x3(x_iter, y_iter)
             y3 = self.cal_nll(x3)
 
-            if abs(x_iter[-1] - x3) <= stop_cond:
+            if abs(y3 - y3_old) <= stop_cond:
                 print(f'Stopping condition {stop_cond} reached after {num} iterations')
                 print(f'Minimum is x = {x3} y = {y3}')
                 break
@@ -113,14 +114,15 @@ class Minimiser():
             y_iter.pop(ind_max)
 
             if num == num_max:
-                print(f'Max iterations {num_max} reached')
+                print(f'Max iterations {num_max} reached with stopping condition {stop_cond}')
                 break
 
             num += 1
+            y3_old = 1. * y3
 
         return x3, y3
 
-    def univariate(self, theta_guess, dm2_guess, gue_step_the=50, gue_step_dm2=100, num_max=500, stop_cond=5e-6):
+    def univariate(self, theta_guess, dm2_guess, gue_step_the=50, gue_step_dm2=150, num_max=100, stop_cond=1e-6):
         """
         Univariate method
         """
@@ -133,78 +135,93 @@ class Minimiser():
 
         x_iter = [x0, x1, x2]
         y_iter = [y0, y1, y2]
-        nll_iter = [self.cal_nll([theta_guess, y]) for y in y_iter]  
+        nll_x = [self.cal_nll([x, dm2_guess]) for x in x_iter]  
+        nll_y = [self.cal_nll([theta_guess, y]) for y in y_iter]  
 
-        # iterate
-        num = 1
+        # list for storing values for plotting
+        x_min = []
+        y_min = []
         x_all = []
         y_all = []
+        x_all += x_iter
+        y_all += y_iter
+
+        # initalise iterate values
+        num = 1
+        nll_old_x = 0
+        nll_old_y = 0
         while True:
             # get min theta to do parabolic along dm2
-            ind_min = np.argmin(nll_iter)
+            ind_min = np.argmin(nll_y)
             xmin = x_iter[ind_min]
             ymin = y_iter[ind_min]
-            x_all += [xmin]
-            y_all += [ymin]
+            x_min += [xmin]
+            y_min += [ymin]
 
             # estimate another theta
-            x3 = self.cal_x3(x_iter, nll_iter)
+            x3 = self.cal_x3(x_iter, nll_x)
             nll = self.cal_nll([x3, ymin])
 
-            if abs(nll_iter[-1] - nll) <= stop_cond:
+            if abs(nll_old_x - nll) <= stop_cond:
                 print(f'Stopping condition {stop_cond} reached after {num} iterations')
-                print(f'Minimum is\ntheta = {x3}\ndm2 = {y3}\nnll = {nll}')
+                print(f'Minimum of nll = {nll} is at\ntheta = {x3}\ndm2 = {y3}')
                 break
 
             x_iter.append(x3)
-            nll_iter.append(nll)
+            nll_x.append(nll)
             
             # shuffle two lists with same order
-            x_iter, nll_iter = self.shuffle(x_iter, nll_iter)
+            x_iter, nll_x = self.shuffle(x_iter, nll_x)
 
             # remove max value and update array
-            ind_max = np.argmax(nll_iter)
+            ind_max = np.argmax(nll_x)
             x_iter.pop(ind_max)
-            nll_iter.pop(ind_max)
+            nll_x.pop(ind_max)
+            x_all += x_iter
+            y_all += y_iter
 
             if num == num_max:
-                print(f'Max iterations {num_max} reached')
+                print(f'Max iterations {num_max} reached with stopping condition {stop_cond}')
                 break
 
             num += 1
-
+            nll_old_x = 1. * nll
+            
             # get min theta to do parabolic along dm2
-            ind_min = np.argmin(nll_iter)
+            ind_min = np.argmin(nll_x)
             xmin = x_iter[ind_min]
             ymin = y_iter[ind_min]
-            x_all += [xmin]
-            y_all += [ymin]
+            x_min += [xmin]
+            y_min += [ymin]
 
             # estimate another dm2
-            y3 = self.cal_x3(y_iter, nll_iter)
+            y3 = self.cal_x3(y_iter, nll_y)
             nll = self.cal_nll([xmin, y3])
 
-            if abs(nll_iter[-1] - nll) <= stop_cond:
+            if abs(nll_old_y - nll) <= stop_cond:
                 print(f'Stopping condition {stop_cond} reached after {num} iterations')
-                print(f'Minimum is\ntheta = {x3}\ndm2 = {y3}\nnll = {nll}')
+                print(f'Minimum of nll = {nll} is at\ntheta = {x3}\ndm2 = {y3}')
                 break
 
             y_iter.append(y3)
-            nll_iter.append(nll)
+            nll_y.append(nll)
 
             # shuffle two lists with same order
-            y_iter, nll_iter = self.shuffle(y_iter, nll_iter)
+            y_iter, nll_y = self.shuffle(y_iter, nll_y)
 
             # remove max value and update array
-            ind_max = np.argmax(nll_iter)
+            ind_max = np.argmax(nll_y)
             y_iter.pop(ind_max)
-            nll_iter.pop(ind_max)
+            nll_y.pop(ind_max)
+            x_all += x_iter
+            y_all += y_iter
 
             if num == num_max:
                 print(f'Max iterations {num_max} reached')
                 break
 
             num += 1
+            nll_old_y = 1. * nll
 
-        return x3, y3, nll, np.array(x_all), np.array(y_all)
+        return x3, y3, nll, np.array(x_min), np.array(y_min), np.array(x_all), np.array(y_all)
     

@@ -33,31 +33,53 @@ def data(energy, data_osc, data_unosc, width):
 
 def data_aligned(energy, data_osc, data_unosc, width, plot=True):
     if plot:
+        col_ax = 'C2'
+        col_ax2 = 'C4'
+
         fig, ax = plt.subplots()
         ax2 = ax.twinx()
 
-        ax.bar(energy, data_osc, width, align="edge", color="C1", alpha=0.9,
+        ax.bar(energy, data_osc, width, align="edge", color=col_ax, alpha=0.9,
                label="Observed (oscillated)")
-        ax.bar(0, 0, color="C4", label="Simulated (not osicllated)")
+        ax.bar(0, 0, color=col_ax2, label="Simulated (not osicllated)")
         
-        ax2.bar(energy, data_unosc, width, align="edge", color="C4", alpha=0.75,
+        ax2.bar(energy, data_unosc, width, align="edge", color=col_ax2, alpha=0.75,
                 label="Simulated (not osicllated)")
 
-        ax.set_xlabel("Energy (GeV)")
-        ax.set_ylabel(r"# of entries (oscillated $\nu_\mu$)", color="C1")
-        ax2.set_ylabel(r"# of entries (non-oscillated)", color="C4")
+        ax.set_xlabel("Energy [GeV]")
+        ax.set_ylabel(r"# of entries (oscillated $\nu_\mu$)", color=col_ax)
+        ax2.set_ylabel(r"# of entries (non-oscillated)", color=col_ax2)
 
-        ax.tick_params(axis="y", colors="C1")
-        ax2.tick_params(axis="y", colors="C4")
-        ax.yaxis.label.set_color('C1')
-        ax2.yaxis.label.set_color("C4")
+        ax.tick_params(axis="y", colors=col_ax)
+        ax2.tick_params(axis="y", colors=col_ax2)
+        ax.yaxis.label.set_color(col_ax)
+        ax2.yaxis.label.set_color(col_ax2)
 
         ax.legend()
         ax.grid(lw=0.4)
         plt.show()
 
 
-def neutrino_prob(energy):
+def neutrino_prob_sing(energy, plot=True):
+    if plot:
+        fig = plt.figure()
+        p = plt.plot(energy, fc.neutrino_prob(E=energy))
+
+        props = dict(boxstyle='round', facecolor='white', alpha=1,
+                    edgecolor=p[0].get_color())
+        text = r"$\theta_{23}$ = $\pi/4$" + "\n" + \
+               r"$\Delta m^2_{23}$" + \
+               r"= 2.4" + r" $10^{-3} eV^2$"
+        plt.annotate (text, (0.7, 0.1), xycoords="axes fraction", size=15, bbox=props)
+
+        plt.xlabel("Energy [GeV]")
+        plt.ylabel(r"Survival Probability $\nu_\mu\rightarrow\nu_\mu$")
+
+        plt.grid(lw=0.4)
+        plt.show()
+
+
+def neutrino_prob_mul(energy):
     fig = plt.figure()
     plt.plot(energy, fc.neutrino_prob(E=energy), label='default params')
     plt.plot(energy, fc.neutrino_prob(E=energy, theta=np.pi/8), '-.', label='halve theta')
@@ -115,7 +137,7 @@ def nll_1d_dm2(dm2_list, nll_list, theta):
 
 def nll_2d_theta_dm2(theta_list, dm2_list, nll_list, plot=True):
     if plot:
-        # possible colors: "Reds", "viridis", "bone", "nipy_spectral", "gist_ncar", "jet"
+        # possible colors: "YlGnBu", "Reds", "viridis", "bone", "nipy_spectral", "gist_ncar", "jet"
         for i in ["nipy_spectral"]:
 
             fig, axes = plt.subplots(2, 1, figsize=(7, 9), gridspec_kw={'height_ratios': [2, 1]})
@@ -141,4 +163,32 @@ def nll_2d_theta_dm2(theta_list, dm2_list, nll_list, plot=True):
 
             fig.colorbar(cntr0, ax=axes, label="Negative Log Likelihood")
 
-            fig.show()
+            plt.show()
+
+
+def visual_univeriate(
+        theta_list, dm2_list, nll_list,
+        theta_min, dm2_min,
+        theta_all, dm2_all,
+        theta_update, dm2_update,
+        theta_guess, dm2_guess
+        ):
+    # possible colors: "YlGnBu", "Reds", "viridis", "bone", "nipy_spectral", "gist_ncar", "jet"
+    for i in ["nipy_spectral"]:
+
+        fig, ax1 = plt.subplots(1, 1, figsize=(6, 4))
+
+        cntr1 = ax1.contourf(theta_list, dm2_list, nll_list, 300, cmap=i)
+        ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
+        ax1.set_ylabel(r"$\Delta m_{23}^2$ $[10^{-3}\/ \/eV^2]$")
+        ax1.plot(theta_update, dm2_update, '.', color='cyan', label='Points of parabola')
+        ax1.plot(theta_all, dm2_all, '+', color='white', label='Min of the step')
+        ax1.plot(theta_guess, dm2_guess, 'o', color='C2', label='Start')
+        ax1.plot(theta_min, dm2_min, 'o', color='red', label='End')
+        
+        plt.subplots_adjust(hspace=0.2, top=0.95, bottom=0.1)
+
+        fig.colorbar(cntr1, ax=ax1, label="Negative Log Likelihood")
+        
+        ax1.legend()
+        plt.show()
