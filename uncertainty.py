@@ -24,7 +24,7 @@ def list(min_func, theta_min, theta_plus, theta_minus, nll_change):
 
     for i in range(num):  # calculate NLL for each theta above theta min
         theta = theta_plus_list[i]
-        nll = min_func.cal_nll(theta=theta)
+        nll = min_func.cal_nll(theta)
         if np.isclose(nll, nll_change):
             print(f'\nUpper theta = {theta} gives roughly nll_min + 1 = {nll_change}')
             print(f'which the % difference from expected nll_change is {(nll - nll_change)*100/nll_change}')
@@ -33,7 +33,7 @@ def list(min_func, theta_min, theta_plus, theta_minus, nll_change):
 
     for i in range(num):  # calculate NLL for each theta above theta min
         theta = theta_minus_list[-i]
-        nll = min_func.cal_nll(theta=theta)
+        nll = min_func.cal_nll(theta)
         if np.isclose(nll, nll_change):
             print(f'\nLower theta = {theta} gives roughly nll_min + 1 = {nll_change}')
             print(f'which the % difference from expected nll_change is {(nll - nll_change)*100/nll_change}')
@@ -57,8 +57,8 @@ def secant(min_func, x1, x2, sol_true, stop_err=1e-6, iter_max=100):
     
     while True: 
         # calculate the intermediate value
-        sol1 = min_func.cal_nll(theta=x1)  # use the function for calculating nll from theta
-        sol2 = min_func.cal_nll(theta=x2)
+        sol1 = min_func.cal_nll(x1)  # use the function for calculating nll from theta
+        sol2 = min_func.cal_nll(x2)
 
         gradient = (sol1 - sol2) / (x1 - x2)
         x_new = x1 + ((sol_true - sol1) / gradient)
@@ -71,7 +71,7 @@ def secant(min_func, x1, x2, sol_true, stop_err=1e-6, iter_max=100):
         n += 1 
 
         # compare with true value and stopping condition
-        sol_new = min_func.cal_nll(theta=x_new)
+        sol_new = min_func.cal_nll(x_new)
         if abs(sol_new - sol_true) < stop_err:
             print("\nRoot of the given equation =", round(x_new, 6)) 
             print(f'i.e. theta = {x_new} giving nll + 1 roughly = {sol_new}')
@@ -93,7 +93,7 @@ def gradient(f, x):
 
     N = x.shape[0]
     gradient = []
-    
+
     for i in range(N):
         h = abs(x[i]) *  np.finfo(np.float32).eps  # abs(x[i]) * difference between 1.0 and the next smallest representable float larger than 1.0
         xx = 1. * x[i]  # store x[i] but avoid shallow copy
