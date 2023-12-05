@@ -200,8 +200,13 @@ dm2_guess = 2.25
     num_max=100, stop_cond=1e-10
     )
 
+# estimate error
+print('\n-- Uncertainties from Hessian --')
+un.std_2(min_func, theta_min, dm2_min)
+
+# plot
 if plot:
-    pl_func.visual_univeriate(
+    pl_func.visual_one_method(
             min_func,
             N,
             theta_low, theta_high,
@@ -219,22 +224,6 @@ if plot:
         )
 
 
-# estimate error
-print('\n-- Uncertainties from Hessian --')
-
-hes = un.hessian(func=min_func.cal_nll, x=np.array([theta_min, dm2_min]))
-
-hes_inv = np.linalg.inv(hes)  # inverse hessian to get covariance
-sig_theta = np.sqrt(2) * np.sqrt(hes_inv[0][0])  # std is sqrt of covariance diagonal
-sig_dm2 = np.sqrt(2) * np.sqrt(hes_inv[1][1])
-
-print(f'\ntheta_min = {theta_min:.4f} +/- {sig_theta:.4f}')
-print(f'with % error +/- {(sig_theta*100/theta_min):.2f}')
-
-print(f'\ndm2_min = {dm2_min:.4f} +/- {sig_dm2:.4f}')
-print(f'with % error +/- {(sig_dm2*100/dm2_min):.2f}')
-
-
 '''
 Newton's method
 '''
@@ -242,113 +231,24 @@ print()
 print('-'*23)
 print('--- Newton\'s method ---\n')
 
-def Newtons(theta0, dm20, num_max=100, stop_cond=1e-10):
-    """
-    Newton's method
-    """
-
-    # initalise
-    params = np.array([theta0, dm20])
-    nll = min_func.cal_nll(params)
-    theta_list = []
-    dm2_list = []
-    theta_list += [theta0]
-    dm2_list += [dm20]
-    err_list = []
-
-    # iterate
-    num = 1
-    while True:
-        # grad of function
-        grad = un.gradient(f=min_func.cal_nll, x=params)
-
-        # inverse hessian
-        hes = un.hessian(func=min_func.cal_nll, x=params)
-        hes_inv = np.linalg.inv(hes)
-
-        # update parameters and nll
-        params_new = params - np.dot(hes_inv, grad)
-        nll_new = min_func.cal_nll(params_new)
-        theta_list += [params_new[0]]
-        dm2_list += [params_new[1]]
-
-        # error
-        err = abs(nll_new - nll)
-        err_list += [err]
-
-        if err <= stop_cond:
-            print(f'Stopping condition {stop_cond} reached after {num} iterations')
-            print(f'Minimum of nll = {nll_new} is at\ntheta = {params_new[0]}\ndm2 = {params_new[1]} e-3')
-            break
-
-        if num == num_max:
-            print(f'Max iterations {num_max} reached with stopping condition {stop_cond}')
-            break
-
-        num += 1
-        nll = 1. * nll_new
-
-    return params_new[0], params_new[1], nll_new, err_list, theta_list, dm2_list
-
 # Newtons
 theta_guess = 0.65
 dm2_guess = 2.25
 
 (theta_min, dm2_min, nll_min,
  err_list,
- theta_plot, dm2_plot) = Newtons(
+ theta_plot, dm2_plot) = min_func.Newtons(
      theta_guess, dm2_guess,
      num_max=100, stop_cond=1e-10
      )
 
+# estimate error
+print('\n-- Uncertainties from Hessian --')
+un.std_2(min_func, theta_min, dm2_min)
 
-def visual_methods(
-        min_func,
-        N,
-        theta_low, theta_high,
-        dm2_low, dm2_high,
-        theta_min, dm2_min,
-        theta_plot, dm2_plot,
-        ):
-
-    theta_list = np.linspace(theta_low, theta_high, N)
-    dm2_list = np.linspace(dm2_low, dm2_high, N)
-
-    nll_list = np.zeros((N, N))
-    for i in range(len(theta_list)):
-        for j in range(len(dm2_list)):
-            nll = min_func.cal_nll([theta_list[i], dm2_list[j]])
-            nll1 = 1. * nll
-            nll_list[j][i] = nll1
-
-    nll_list = np.array(nll_list)
-
-    fig, ax1 = plt.subplots(figsize=(6, 4))
-    cntr1 = ax1.contourf(theta_list, dm2_list, nll_list, levels=80, cmap='GnBu_r')
-    ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
-    ax1.set_ylabel(r"$\Delta m_{23}^2$ $[10^{-3}\/ \/eV^2]$")
-    ax1.plot(theta_min, dm2_min, 'x', color='red', label='Minimum')
-
-    cntr1.levels = cntr1.levels.tolist()
-    cntr2 = ax1.contour(cntr1, levels=cntr1.levels[1:9:2], colors='w', alpha=0.5)
-    cntr2 = ax1.contour(cntr1, levels=cntr1.levels[10:-1:10], colors='w', alpha=0.5)
-
-    # plot path
-    X, Y = theta_plot[:-1], dm2_plot[:-1]
-    U = np.subtract(theta_plot[1:], theta_plot[:-1])
-    V = np.subtract(dm2_plot[1:], dm2_plot[:-1])
-    ax1.quiver(X, Y, U, V, color="white", angles='xy', scale_units='xy', scale=1, label='Min of the step')
-
-    plt.subplots_adjust(hspace=0.2, top=0.95, bottom=0.1)
-
-    fig.colorbar(cntr1, ax=ax1, label="Negative Log Likelihood")
-    
-    ax1.legend()
-    plt.show()
-
-
-if True:
-    visual_methods(
+# plot
+if plot:
+    pl_func.visual_one_method(
             min_func,
             N,
             theta_low, theta_high,
@@ -357,7 +257,91 @@ if True:
             theta_plot, dm2_plot,
             )
 
+if plot:
+    pl_func.change_nll(
+        err_list,
+        label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$"
+        )
+
+
+'''
+Quasi-Newton method
+'''
+print()
+print('-'*27)
+print('--- Quasi-Newton method ---\n')
+
+# Quasi-Newton
+theta_guess = 0.65
+dm2_guess = 2.35
+
+(theta_min, dm2_min, nll_min,
+ err_list,
+ theta_plot, dm2_plot) = min_func.quasi_Newton(
+     theta_guess, dm2_guess,
+     alpha=1e-5,
+     num_max=100, stop_cond=1e-10
+     )
+
+# estimate error
+print('\n-- Uncertainties from Hessian --')
+un.std_2(min_func, theta_min, dm2_min)
+
+# plot
+if plot:
+    pl_func.visual_one_method(
+            min_func,
+            N,
+            theta_low, theta_high,
+            dm2_low, dm2_high,
+            theta_min, dm2_min,
+            theta_plot, dm2_plot,
+            )
+
+if plot:
+    pl_func.change_nll(
+        err_list,
+        label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$"
+        )
+
+
+'''
+Monte-Carlo method
+'''
+print()
+print('-'*26)
+print('--- Monte-Carlo method ---\n')
+
+# Monte-Carlo
+theta_guess = 0.75
+dm2_guess = 2.45
+T0 = 50
+step = 1e-2
+
+(theta_min, dm2_min, nll_min,
+ err_list,
+ theta_plot, dm2_plot) = min_func.Monte_Carlo(
+    theta_guess, dm2_guess,
+    T0, step,
+    num_max=1000, stop_cond=1e-10
+     )
+
+# estimate error
+print('\n-- Uncertainties from Hessian --')
+un.std_2(min_func, theta_min, dm2_min)
+
+# plot
 if True:
+    pl_func.visual_one_method(
+            min_func,
+            N,
+            theta_low, theta_high,
+            dm2_low, dm2_high,
+            theta_min, dm2_min,
+            theta_plot, dm2_plot,
+            )
+
+if plot:
     pl_func.change_nll(
         err_list,
         label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$"

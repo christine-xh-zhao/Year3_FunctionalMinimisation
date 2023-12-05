@@ -10,7 +10,7 @@ def list(min_func, theta_min, theta_plus, theta_minus, nll_change):
     Select the closest NLL value from a list
 
     Args:
-    - min_func -- function for calculating NLL from theta
+    - min_func -- the object contains the function for calculating NLL from theta as its instance
     - theta_min -- estimated theta value, here is the theta giving min NLL
     - theta_plus -- upper bound of possible theta
     - theta_minus -- lower bound of possible theta
@@ -48,7 +48,7 @@ def secant(min_func, x1, x2, sol_true, stop_err=1e-6, iter_max=100):
     Secant method for root finding to solve theta giving expected NLL
 
     Args:
-    - min_func -- function for calculating NLL from theta
+    - min_func -- the object contains the function for calculating NLL from theta as its instance
     - x1 -- one bound of possible theta
     - x2 -- the other bound of possible theta
     - sol_true -- nll_min + 1, the expected NLL value
@@ -139,3 +139,21 @@ def hessian(func, x):
         x[i] = xx  # restore x[i]
 
     return hessian
+
+
+def std_2(min_func, theta_min, dm2_min):
+    """
+    Calculate standard deviation for minimised theta and dm2
+    """
+    
+    hes = hessian(func=min_func.cal_nll, x=np.array([theta_min, dm2_min]))
+
+    hes_inv = np.linalg.inv(hes)  # inverse hessian to get covariance
+    sig_theta = np.sqrt(2) * np.sqrt(hes_inv[0][0])  # std is sqrt of covariance diagonal
+    sig_dm2 = np.sqrt(2) * np.sqrt(hes_inv[1][1])
+
+    print(f'\ntheta_min = {theta_min:.4f} +/- {sig_theta:.4f}')
+    print(f'with % error +/- {(sig_theta*100/theta_min):.2f}')
+
+    print(f'\ndm2_min = {dm2_min:.4f} +/- {sig_dm2:.4f}')
+    print(f'with % error +/- {(sig_dm2*100/dm2_min):.2f}')

@@ -2,18 +2,18 @@
 Minimisers
 """
 
-import copy
 import random
 import numpy as np
 
 import load_data as ld
 import function as fc
+import uncertainty as un
 
 
 class Minimiser():
 
     def __init__(self):
-        data_osc, data_unosc, energy, width = ld.LoadData().get_data()  # energy (GeV) in each bin
+        data_osc, data_unosc, energy, _ = ld.LoadData().get_data()  # energy (GeV) in each bin
         
         self.data_osc = data_osc
         self.data_unosc = data_unosc
@@ -252,4 +252,212 @@ class Minimiser():
             nll_old = 1. * nll_min
 
         return xmin, ymin, nll_min, err_list, np.array(x_min), np.array(y_min), np.array(x_all), np.array(y_all)
-    
+
+    def Newtons(self, theta0, dm20, num_max=100, stop_cond=1e-10):
+        """
+        Newton's method
+        """
+
+        # initalise
+        params = np.array([theta0, dm20])
+        nll = self.cal_nll(params)
+
+        theta_list = []
+        dm2_list = []
+        theta_list += [theta0]
+        dm2_list += [dm20]
+
+        err_list = []
+
+        # iterate
+        num = 1
+        while True:
+            # grad of function
+            grad = un.gradient(f=self.cal_nll, x=params)
+
+            # inverse hessian
+            hes = un.hessian(func=self.cal_nll, x=params)
+            hes_inv = np.linalg.inv(hes)
+
+            # update parameters and nll
+            params_new = params - np.dot(hes_inv, grad)
+            nll_new = self.cal_nll(params_new)
+            theta_list += [params_new[0]]
+            dm2_list += [params_new[1]]
+
+            # error
+            err = abs(nll_new - nll)
+            err_list += [err]
+
+            if err <= stop_cond:
+                print(f'Stopping condition {stop_cond} reached after {num} iterations')
+                print(f'Minimum of nll = {nll_new} is at\ntheta = {params_new[0]}\ndm2 = {params_new[1]} e-3')
+                break
+
+            if num == num_max:
+                print(f'Max iterations {num_max} reached with stopping condition {stop_cond}')
+                break
+
+            num += 1
+            params = 1. * params_new
+            nll = 1. * nll_new
+
+        return params_new[0], params_new[1], nll_new, err_list, theta_list, dm2_list
+
+    def quasi_Newton(self, theta0, dm20, alpha, num_max=100, stop_cond=1e-10):
+        """
+        Quasi-Newton method
+        """
+
+        # initalise
+        params = np.array([theta0, dm20])
+        nll = self.cal_nll(params)
+
+        N = len(params)
+        G = np.identity(N) 
+        grad = un.gradient(f=self.cal_nll, x=params)
+
+        theta_list = []
+        dm2_list = []
+        theta_list += [theta0]
+        dm2_list += [dm20]
+
+        err_list = []
+
+        # iterate
+        num = 1
+        while True:
+            # inverse hessian
+            hes_inv = alpha * G
+
+            # update parameters and nll
+            params_new = params - np.dot(hes_inv, grad)
+            nll_new = self.cal_nll(params_new)
+            theta_list += [params_new[0]]
+            dm2_list += [params_new[1]]
+
+            # error
+            err = abs(nll_new - nll)
+            err_list += [err]
+
+            if err <= stop_cond:
+                print(f'Stopping condition {stop_cond} reached after {num} iterations')
+                print(f'Minimum of nll = {nll_new} is at\ntheta = {params_new[0]}\ndm2 = {params_new[1]} e-3')
+                break
+
+            if num == num_max:
+                print(f'Max iterations {num_max} reached with stopping condition {stop_cond}')
+                break
+
+            # update G
+            grad_new = un.gradient(f=self.cal_nll, x=params_new)
+
+            gamma = grad_new - grad
+            delta = params_new - params
+
+            gamma_out = np.outer(gamma, gamma)
+            delta_out = np.outer(delta, delta)
+            denom1 = np.dot(gamma, delta)
+            numer2 = np.dot(G, np.dot(gamma_out, G))
+            denom2 = np.dot(gamma, np.dot(G, gamma))
+
+            G = G + delta_out/denom1 - numer2/denom2
+            
+            # update other parameters
+            num += 1
+            params = 1. * params_new
+            nll = 1. * nll_new
+            grad = 1. * grad_new
+
+            # increase alpha towards 1
+            expo = 6 - num
+            if expo > 0:
+                alpha = alpha * np.exp(expo)
+            else:
+                alpha = 1
+
+        return params_new[0], params_new[1], nll_new, err_list, theta_list, dm2_list
+
+    def Monte_Carlo(
+            self,
+            theta_guess, dm2_guess,
+            T0, step,
+            num_max=1000, stop_cond=1e-10
+            ):
+        """
+        Monte-Carlo method with k_b = 1
+        """
+
+        # initialise
+        theta = theta_guess
+        dm2 = dm2_guess
+        nll = self.cal_nll([theta, dm2])
+        T = T0
+
+        theta_list = []
+        dm2_list = []
+        nll_list = []
+        theta_list += [theta_guess]
+        dm2_list += [dm2_guess]
+        nll_list += [nll]
+
+        err_list = []
+
+        # iterate
+        num = 1
+        while True:
+            # random float following Gaussian with average 0 and variance of 1
+            rand1 = np.random.randn(1)[0]
+            rand2 = np.random.randn(1)[0]
+            
+            # update
+            theta_new = theta + theta * rand1 * step
+            dm2_new = dm2 + dm2 * rand2 * step
+            nll_new = self.cal_nll([theta_new, dm2_new])
+
+            # change in energy
+            nll_diff = nll_new - nll
+
+            # lowering temperature when iterating more
+            T = T / num
+
+            # probability
+            if T <= 1e-09:  # to avoid overflow
+                if nll_diff < 0:
+                    prob = 1
+                else:
+                    T = 1e-09
+            else: 
+                expo = -nll_diff / T
+            prob = np.exp(expo)
+
+            # error
+            err = abs(nll_new - nll)
+            err_list += [err]
+
+            if err <= stop_cond:
+                theta_min, dm2_min, nll_min = theta_list[-1], dm2_list[-1], nll_list[-1]
+                
+                print(f'Stopping condition {stop_cond} reached after {num} iterations')
+                print(f'Minimum of nll = {nll_min} is at\ntheta = {theta_min}\ndm2 = {dm2_min} e-3')
+                break
+
+            if num == num_max:
+                print(f'Max iterations {num_max} reached with stopping condition {stop_cond}')
+                break
+
+            # acceptance condition
+            if nll_diff <= 0 or np.random.rand() < prob:
+                theta = 1. * theta_new
+                dm2 = 1. * dm2_new
+                nll = 1. * nll_new
+                
+                theta_list += [theta]
+                dm2_list += [dm2]
+                nll_list += [nll]
+
+            num += 1
+
+        theta_min, dm2_min, nll_min = theta_list[-1], dm2_list[-1], nll_list[-1]
+
+        return theta_min, dm2_min, nll_min, err_list, theta_list, dm2_list
