@@ -119,7 +119,7 @@ def data_with_prob(energy, data_unosc_prob, data_unosc, data_osc, width):
 
 def nll_1d_theta(theta_list, nll_list, dm2=2.4):
     fig = plt.figure()
-    plt.plot(theta_list, nll_list, '.', label=f'dm2 = {dm2} e-3')
+    plt.plot(theta_list, nll_list, label=f'dm2 = {dm2} e-3')
     plt.ylabel('NLL')
     plt.xlabel('theta')
     plt.legend()
@@ -143,7 +143,7 @@ def nll_1d_dm2(
     nll_list = np.array(nll_list)
 
     fig = plt.figure()
-    plt.plot(dm2_list, nll_list, '.', label=f'theta = {theta_min}')
+    plt.plot(dm2_list, nll_list, label=f'theta = {theta_min}')
     plt.ylabel('NLL')
     plt.xlabel('dm2')
     plt.legend()

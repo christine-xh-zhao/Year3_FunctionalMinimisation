@@ -242,7 +242,7 @@ print()
 print('-'*23)
 print('--- Newton\'s method ---\n')
 
-def Newtons(self, theta0, dm20, num_max=100, stop_cond=1e-10):
+def Newtons(theta0, dm20, num_max=100, stop_cond=1e-10):
     """
     Newton's method
     """
@@ -323,30 +323,31 @@ def visual_methods(
 
     nll_list = np.array(nll_list)
 
-    # possible colors: "YlGnBu", "Reds", "viridis", "bone", "nipy_spectral", "gist_ncar", "jet"
-    for i in ["nipy_spectral"]:
+    fig, ax1 = plt.subplots(figsize=(6, 4))
+    cntr1 = ax1.contourf(theta_list, dm2_list, nll_list, levels=80, cmap='GnBu_r')
+    ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
+    ax1.set_ylabel(r"$\Delta m_{23}^2$ $[10^{-3}\/ \/eV^2]$")
+    ax1.plot(theta_min, dm2_min, 'x', color='red', label='Minimum')
 
-        fig, ax1 = plt.subplots(1, 1, figsize=(6, 4))
+    cntr1.levels = cntr1.levels.tolist()
+    cntr2 = ax1.contour(cntr1, levels=cntr1.levels[1:9:2], colors='w', alpha=0.5)
+    cntr2 = ax1.contour(cntr1, levels=cntr1.levels[10:-1:10], colors='w', alpha=0.5)
 
-        cntr1 = ax1.contourf(theta_list, dm2_list, nll_list, 300, cmap=i)
-        ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
-        ax1.set_ylabel(r"$\Delta m_{23}^2$ $[10^{-3}\/ \/eV^2]$")
-        ax1.plot(theta_min, dm2_min, 'x', color='red', label='Minimum')
-        
-        # plot path
-        X, Y = theta_plot[:-1], dm2_plot[:-1]
-        U = np.subtract(theta_plot[1:], theta_plot[:-1])
-        V = np.subtract(dm2_plot[1:], dm2_plot[:-1])
-        ax1.quiver(X, Y, U, V, color="white", angles='xy', scale_units='xy', scale=1, label='Min of the step')
+    # plot path
+    X, Y = theta_plot[:-1], dm2_plot[:-1]
+    U = np.subtract(theta_plot[1:], theta_plot[:-1])
+    V = np.subtract(dm2_plot[1:], dm2_plot[:-1])
+    ax1.quiver(X, Y, U, V, color="white", angles='xy', scale_units='xy', scale=1, label='Min of the step')
 
-        plt.subplots_adjust(hspace=0.2, top=0.95, bottom=0.1)
+    plt.subplots_adjust(hspace=0.2, top=0.95, bottom=0.1)
 
-        fig.colorbar(cntr1, ax=ax1, label="Negative Log Likelihood")
-        
-        ax1.legend()
-        plt.show()
+    fig.colorbar(cntr1, ax=ax1, label="Negative Log Likelihood")
+    
+    ax1.legend()
+    plt.show()
 
-if plot:
+
+if True:
     visual_methods(
             min_func,
             N,
@@ -356,7 +357,7 @@ if plot:
             theta_plot, dm2_plot,
             )
 
-if plot:
+if True:
     pl_func.change_nll(
         err_list,
         label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$"
