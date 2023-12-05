@@ -126,53 +126,103 @@ def nll_1d_theta(theta_list, nll_list, dm2=2.4):
     plt.show()
     
 
-def nll_1d_dm2(dm2_list, nll_list, theta):
+def nll_1d_dm2(
+        min_func,
+        dm2_min, dm2_max,
+        num,
+        theta_min
+        ):
+    
+    dm2_list = np.linspace(dm2_min, dm2_max, num)  # list of theta values
+
+    nll_list = []
+    for dm2 in dm2_list:  # calculate NLL for each dm2
+        nll = min_func.cal_nll([theta_min, dm2])
+        nll_list += [nll]
+
+    nll_list = np.array(nll_list)
+
     fig = plt.figure()
-    plt.plot(dm2_list, nll_list, '.', label=f'theta = {theta}')
+    plt.plot(dm2_list, nll_list, '.', label=f'theta = {theta_min}')
     plt.ylabel('NLL')
     plt.xlabel('dm2')
     plt.legend()
     plt.show()
 
 
-def nll_2d_theta_dm2(theta_list, dm2_list, nll_list, plot=True):
-    if plot:
-        # possible colors: "YlGnBu", "Reds", "viridis", "bone", "nipy_spectral", "gist_ncar", "jet"
-        for i in ["nipy_spectral"]:
+def change_nll(err_list, label):
+    fig = plt.figure()
+    plt.semilogy(np.arange(1, len(err_list)+1), err_list, label='Optimise ' + label)
+    plt.plot([1, len(err_list)], [1e-10, 1e-10], label='Stopping condition')
+    plt.ylabel('Change in NLL\n(current - previous iteration)')
+    plt.xlabel('Iteration number')
+    plt.legend()
+    plt.show()
 
-            fig, axes = plt.subplots(2, 1, figsize=(7, 9), gridspec_kw={'height_ratios': [2, 1]})
-            ax0 = axes[0]
-            ax1 = axes[1]
-            
-            cntr0 = ax0.contourf(theta_list, dm2_list, nll_list, 300, cmap=i)
-            ax0.set_xlabel(r"$\theta_{23}$ $[rad]$")
-            ax0.set_ylabel(r"$\Delta m_{23}^2$ $[10^{-3}\/ \/eV^2]$")
-            ax0.annotate ("a)", (-0.15, 1.00), xycoords = "axes fraction")
-            
-            plt.subplot(2, 1, 2)
 
-            cntr1 = ax1.contourf(theta_list, dm2_list, nll_list, 300, cmap=i)
-            ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
-            ax1.set_ylabel(r"$\Delta m_{23}^2$ $[10^{-3}\/ \/eV^2]$")
-            ax1.annotate ("b)", (-0.15, 1.00), xycoords="axes fraction")
-                        
-            ax1.set_xlim(0.65, 0.9)
-            ax1.set_ylim(1.5, 3.5)
-            
-            plt.subplots_adjust(hspace=0.2, top=0.95, bottom=0.1)
+def nll_2d_theta_dm2(min_func, N, theta_list, dm2_list):
+    
+    nll_list = np.zeros((N, N))
+    for i in range(len(theta_list)):
+        for j in range(len(dm2_list)):
+            nll = min_func.cal_nll([theta_list[i], dm2_list[j]])
+            nll1 = 1. * nll
+            nll_list[j][i] = nll1
 
-            fig.colorbar(cntr0, ax=axes, label="Negative Log Likelihood")
+    nll_list = np.array(nll_list)
 
-            plt.show()
+    # possible colors: "YlGnBu", "Reds", "viridis", "bone", "nipy_spectral", "gist_ncar", "jet"
+    for i in ["nipy_spectral"]:
+
+        fig, axes = plt.subplots(2, 1, figsize=(7, 9), gridspec_kw={'height_ratios': [2, 1]})
+        ax0 = axes[0]
+        ax1 = axes[1]
+        
+        cntr0 = ax0.contourf(theta_list, dm2_list, nll_list, 300, cmap=i)
+        ax0.set_xlabel(r"$\theta_{23}$ $[rad]$")
+        ax0.set_ylabel(r"$\Delta m_{23}^2$ $[10^{-3}\/ \/eV^2]$")
+        ax0.annotate ("a)", (-0.15, 1.00), xycoords = "axes fraction")
+        
+        plt.subplot(2, 1, 2)
+
+        cntr1 = ax1.contourf(theta_list, dm2_list, nll_list, 300, cmap=i)
+        ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
+        ax1.set_ylabel(r"$\Delta m_{23}^2$ $[10^{-3}\/ \/eV^2]$")
+        ax1.annotate ("b)", (-0.15, 1.00), xycoords="axes fraction")
+                    
+        ax1.set_xlim(0.65, 0.9)
+        ax1.set_ylim(1.5, 3.5)
+        
+        plt.subplots_adjust(hspace=0.2, top=0.95, bottom=0.1)
+
+        fig.colorbar(cntr0, ax=axes, label="Negative Log Likelihood")
+
+        plt.show()
 
 
 def visual_univeriate(
-        theta_list, dm2_list, nll_list,
+        min_func,
+        N,
+        theta_low, theta_high,
+        dm2_low, dm2_high,
         theta_min, dm2_min,
+        theta_plot, dm2_plot,
         theta_all, dm2_all,
-        theta_update, dm2_update,
-        theta_guess, dm2_guess
+        plot_points=False
         ):
+
+    theta_list = np.linspace(theta_low, theta_high, N)
+    dm2_list = np.linspace(dm2_low, dm2_high, N)
+
+    nll_list = np.zeros((N, N))
+    for i in range(len(theta_list)):
+        for j in range(len(dm2_list)):
+            nll = min_func.cal_nll([theta_list[i], dm2_list[j]])
+            nll1 = 1. * nll
+            nll_list[j][i] = nll1
+
+    nll_list = np.array(nll_list)
+
     # possible colors: "YlGnBu", "Reds", "viridis", "bone", "nipy_spectral", "gist_ncar", "jet"
     for i in ["nipy_spectral"]:
 
@@ -181,11 +231,16 @@ def visual_univeriate(
         cntr1 = ax1.contourf(theta_list, dm2_list, nll_list, 300, cmap=i)
         ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
         ax1.set_ylabel(r"$\Delta m_{23}^2$ $[10^{-3}\/ \/eV^2]$")
-        ax1.plot(theta_update, dm2_update, '.', color='cyan', label='Points of parabola')
-        ax1.plot(theta_all, dm2_all, '+', color='white', label='Min of the step')
-        ax1.plot(theta_guess, dm2_guess, 'o', color='C2', label='Start')
-        ax1.plot(theta_min, dm2_min, 'o', color='red', label='End')
+        if plot_points:
+            ax1.plot(theta_all, dm2_all, '.', color='cyan', label='Points of parabola')
+        ax1.plot(theta_min, dm2_min, 'x', color='red', label='Minimum')
         
+        # plot path
+        X, Y = theta_plot[:-1], dm2_plot[:-1]
+        U = np.subtract(theta_plot[1:], theta_plot[:-1])
+        V = np.subtract(dm2_plot[1:], dm2_plot[:-1])
+        ax1.quiver(X, Y, U, V, color="white", angles='xy', scale_units='xy', scale=1, label='Min of the step')
+
         plt.subplots_adjust(hspace=0.2, top=0.95, bottom=0.1)
 
         fig.colorbar(cntr1, ax=ax1, label="Negative Log Likelihood")

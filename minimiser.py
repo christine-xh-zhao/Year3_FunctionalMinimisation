@@ -75,8 +75,7 @@ class Minimiser():
 
         return x_iter, y_iter
 
-
-    def parabolic_1d(self, x_list, y_list, num_max=100, stop_cond=5e-6):
+    def parabolic_1d(self, x_list, y_list, num_max=100, stop_cond=1e-10):
         """
         1D parabolic minimiser for neutrino_prob function
         """
@@ -91,16 +90,12 @@ class Minimiser():
 
         # iterate
         num = 1
-        y3_old = 0
+        y_old = 0
+        err_list = []
         while True:
-            
+            # estimate another theta
             x3 = self.cal_x3(x_iter, y_iter)
             y3 = self.cal_nll(x3)
-
-            if abs(y3 - y3_old) <= stop_cond:
-                print(f'Stopping condition {stop_cond} reached after {num} iterations')
-                print(f'Minimum is x = {x3} y = {y3}')
-                break
 
             x_iter.append(x3)
             y_iter.append(y3)
@@ -113,16 +108,35 @@ class Minimiser():
             x_iter.pop(ind_max)
             y_iter.pop(ind_max)
 
+            # get min theta
+            ind_min = np.argmin(y_iter)
+            ymin = y_iter[ind_min]
+            xmin = x_iter[ind_min]
+
+            # error
+            err = abs(ymin - y_old)
+            err_list += [err]
+
+            if err <= stop_cond:
+                print(f'Stopping condition {stop_cond} reached after {num} iterations')
+                print(f'Minimum is x = {xmin} y = {ymin}')
+                break
+
             if num == num_max:
                 print(f'Max iterations {num_max} reached with stopping condition {stop_cond}')
                 break
 
             num += 1
-            y3_old = 1. * y3
+            y_old = 1. * ymin
 
-        return x3, y3
+        return xmin, ymin, err_list
 
-    def univariate(self, theta_guess, dm2_guess, gue_step_the=50, gue_step_dm2=150, num_max=100, stop_cond=1e-6):
+    def univariate(
+            self,
+            theta_guess, dm2_guess,
+            gue_step_the=50, gue_step_dm2=150,
+            num_max=100, stop_cond=1e-10
+            ):
         """
         Univariate method
         """
@@ -139,33 +153,26 @@ class Minimiser():
         nll_y = [self.cal_nll([theta_guess, y]) for y in y_iter]  
 
         # list for storing values for plotting
+        xmin = theta_guess
+        ymin = dm2_guess
         x_min = []
         y_min = []
+        x_min += [xmin]
+        y_min += [ymin]
         x_all = []
         y_all = []
         x_all += x_iter
         y_all += y_iter
+        err_list = []
 
         # initalise iterate values
         num = 1
-        nll_old_x = 0
-        nll_old_y = 0
+        nll_old = 0
         while True:
-            # get min theta to do parabolic along dm2
-            ind_min = np.argmin(nll_y)
-            xmin = x_iter[ind_min]
-            ymin = y_iter[ind_min]
-            x_min += [xmin]
-            y_min += [ymin]
-
             # estimate another theta
+            nll_x = [self.cal_nll([x, ymin]) for x in x_iter]
             x3 = self.cal_x3(x_iter, nll_x)
             nll = self.cal_nll([x3, ymin])
-
-            if abs(nll_old_x - nll) <= stop_cond:
-                print(f'Stopping condition {stop_cond} reached after {num} iterations')
-                print(f'Minimum of nll = {nll} is at\ntheta = {x3}\ndm2 = {y3}')
-                break
 
             x_iter.append(x3)
             nll_x.append(nll)
@@ -180,28 +187,33 @@ class Minimiser():
             x_all += x_iter
             y_all += y_iter
 
+            # get min theta to do parabolic along dm2
+            ind_min = np.argmin(nll_x)
+            nll_min = nll_x[ind_min]
+            xmin = x_iter[ind_min]
+            x_min += [xmin]
+            y_min += [ymin]
+
+            # error
+            err = abs(nll_old - nll_min)
+            err_list += [err]
+
+            if err <= stop_cond:
+                print(f'Stopping condition {stop_cond} reached after {num} iterations')
+                print(f'Minimum of nll = {nll_min} is at\ntheta = {xmin}\ndm2 = {ymin} e-3')
+                break
+
             if num == num_max:
                 print(f'Max iterations {num_max} reached with stopping condition {stop_cond}')
                 break
 
             num += 1
-            nll_old_x = 1. * nll
-            
-            # get min theta to do parabolic along dm2
-            ind_min = np.argmin(nll_x)
-            xmin = x_iter[ind_min]
-            ymin = y_iter[ind_min]
-            x_min += [xmin]
-            y_min += [ymin]
+            nll_old = 1. * nll_min
 
             # estimate another dm2
+            nll_y = [self.cal_nll([xmin, y]) for y in y_iter]
             y3 = self.cal_x3(y_iter, nll_y)
             nll = self.cal_nll([xmin, y3])
-
-            if abs(nll_old_y - nll) <= stop_cond:
-                print(f'Stopping condition {stop_cond} reached after {num} iterations')
-                print(f'Minimum of nll = {nll} is at\ntheta = {x3}\ndm2 = {y3}')
-                break
 
             y_iter.append(y3)
             nll_y.append(nll)
@@ -216,12 +228,28 @@ class Minimiser():
             x_all += x_iter
             y_all += y_iter
 
+            # get min theta to do parabolic along dm2
+            ind_min = np.argmin(nll_y)
+            nll_min = nll_y[ind_min]
+            ymin = y_iter[ind_min]
+            x_min += [xmin]
+            y_min += [ymin]
+
+            # error
+            err = abs(nll_old - nll_min)
+            err_list += [err]
+
+            if err <= stop_cond:
+                print(f'Stopping condition {stop_cond} reached after {num} iterations')
+                print(f'Minimum of nll = {nll_min} is at\ntheta = {xmin}\ndm2 = {ymin} e-3')
+                break
+
             if num == num_max:
                 print(f'Max iterations {num_max} reached')
                 break
 
             num += 1
-            nll_old_y = 1. * nll
+            nll_old = 1. * nll_min
 
-        return x3, y3, nll, np.array(x_min), np.array(y_min), np.array(x_all), np.array(y_all)
+        return xmin, ymin, nll_min, err_list, np.array(x_min), np.array(y_min), np.array(x_all), np.array(y_all)
     
