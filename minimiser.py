@@ -277,6 +277,9 @@ class Minimiser():
 
             # inverse hessian
             hes = un.hessian(func=self.cal_nll, x=params)
+            det_hes = np.linalg.det(hes)  # ensure Hessian is positive definite
+            if det_hes <= 0:
+                print('Determinant of Hessian <= 0')
             hes_inv = np.linalg.inv(hes)
 
             # update parameters and nll
@@ -378,14 +381,64 @@ class Minimiser():
 
         return params_new[0], params_new[1], nll_new, err_list, theta_list, dm2_list
 
+    def gradient_descent(self, theta0, dm20, alpha, num_max=100, stop_cond=1e-10):
+        """
+        Gradient descent
+        """
+
+        # initalise
+        params = np.array([theta0, dm20])
+        nll = self.cal_nll(params)
+
+        theta_list = []
+        dm2_list = []
+        theta_list += [theta0]
+        dm2_list += [dm20]
+
+        err_list = []
+
+        # iterate
+        num = 1
+        while True:
+            # grad of function
+            grad = un.gradient(f=self.cal_nll, x=params)
+
+            # update parameters and nll
+            params_new = params - alpha * grad
+            nll_new = self.cal_nll(params_new)
+            theta_list += [params_new[0]]
+            dm2_list += [params_new[1]]
+
+            # error
+            err = abs(nll_new - nll)
+            err_list += [err]
+
+            if err <= stop_cond:
+                print(f'Stopping condition {stop_cond} reached after {num} iterations')
+                print(f'Minimum of nll = {nll_new} is at\ntheta = {params_new[0]}\ndm2 = {params_new[1]} e-3')
+                break
+
+            if num == num_max:
+                print(f'Max iterations {num_max} reached with stopping condition {stop_cond}')
+                break
+
+            num += 1
+            params = 1. * params_new
+            nll = 1. * nll_new
+
+        return params_new[0], params_new[1], nll_new, err_list, theta_list, dm2_list
+
     def Monte_Carlo(
             self,
             theta_guess, dm2_guess,
-            T0, step,
-            num_max=1000, stop_cond=1e-10
+            T0, step, rho=0.9,
+            num_max=1000, stop_cond=1e-10,
+            method=''
             ):
         """
-        Monte-Carlo method with k_b = 1
+        Monte-Carlo method using classical or fast simulated annealing with k_b = 1
+
+        Select method between 'CSA' and 'FSA'
         """
 
         # initialise
@@ -405,10 +458,18 @@ class Minimiser():
 
         # iterate
         num = 1
+
+        if method == '':
+            raise Exception('method should be specified between \'CSA\' or \'FSA\'')
+            
         while True:
             # random float following Gaussian with average 0 and variance of 1
-            rand1 = np.random.randn(1)[0]
-            rand2 = np.random.randn(1)[0]
+            if method == 'CSA':
+                rand1 = np.random.randn()
+                rand2 = np.random.randn()
+            elif method == 'FSA':
+                rand1 = np.random.default_rng().standard_cauchy()
+                rand2 = np.random.default_rng().standard_cauchy()       
             
             # update
             theta_new = theta + theta * rand1 * step
@@ -419,16 +480,21 @@ class Minimiser():
             nll_diff = nll_new - nll
 
             # lowering temperature when iterating more
-            T = T / num
+            if method == 'CSA':
+                T = (rho**num) * T0
+            elif method == 'FSA':
+                T = T0 / num    
 
             # probability
-            if T <= 1e-09:  # to avoid overflow
-                if nll_diff < 0:
+            if T <= 1e-9:  # T too small will raise division to zero
+                if nll_diff <= 0:
                     prob = 1
                 else:
-                    T = 1e-09
+                    T = 1e-9
             else: 
                 expo = -nll_diff / T
+                if expo >= 709:  # max exponent to aviod overflow in np.exp()
+                    expo = 709
             prob = np.exp(expo)
 
             # error
@@ -461,3 +527,4 @@ class Minimiser():
         theta_min, dm2_min, nll_min = theta_list[-1], dm2_list[-1], nll_list[-1]
 
         return theta_min, dm2_min, nll_min, err_list, theta_list, dm2_list
+    

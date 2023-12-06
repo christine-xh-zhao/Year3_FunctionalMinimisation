@@ -9,6 +9,8 @@ import function as fc
 
 
 def data(energy, data_osc, data_unosc, width):
+
+    # plot energy against raw data, oscillated and unoscillated
     fig = plt.figure()
     plt.bar(energy, data_osc, width, label='oscillated')
     plt.ylabel('# of entries')
@@ -32,6 +34,8 @@ def data(energy, data_osc, data_unosc, width):
 
 
 def data_aligned(energy, data_osc, data_unosc, width, plot=True):
+
+    # plot energy against raw data, oscillated and unoscillated, and align their peaks
     if plot:
         col_ax = 'C2'
         col_ax2 = 'C4'
@@ -80,6 +84,8 @@ def neutrino_prob_sing(energy, plot=True):
 
 
 def neutrino_prob_mul(energy):
+
+    # plot neutrino probability against energy with different theta, dm2, L values
     fig = plt.figure()
     plt.plot(energy, fc.neutrino_prob(E=energy), label='default params')
     plt.plot(energy, fc.neutrino_prob(E=energy, theta=np.pi/8), '-.', label='halve theta')
@@ -117,7 +123,24 @@ def data_with_prob(energy, data_unosc_prob, data_unosc, data_osc, width):
     plt.show()
 
 
-def nll_1d_theta(theta_list, nll_list, dm2=2.4):
+def nll_1d_theta(
+        min_func,
+        theta_min, theta_max,
+        num,
+        dm2=2.4
+        ):
+
+    # generate data to plot
+    theta_list = np.linspace(theta_min, theta_max, num)  # list of theta values
+
+    nll_list = []
+    for theta in theta_list:  # calculate NLL for each theta
+        nll = min_func.cal_nll(theta)
+        nll_list += [nll]
+
+    nll_list = np.array(nll_list)
+
+    # plot theta against nll with fixted dm2
     fig = plt.figure()
     plt.plot(theta_list, nll_list, label=f'dm2 = {dm2} e-3')
     plt.ylabel('NLL')
@@ -133,6 +156,7 @@ def nll_1d_dm2(
         theta_min
         ):
     
+    # generate data to plot
     dm2_list = np.linspace(dm2_min, dm2_max, num)  # list of theta values
 
     nll_list = []
@@ -142,6 +166,7 @@ def nll_1d_dm2(
 
     nll_list = np.array(nll_list)
 
+    # plot dm2 against nll with fixed theta
     fig = plt.figure()
     plt.plot(dm2_list, nll_list, label=f'theta = {theta_min}')
     plt.ylabel('NLL')
@@ -150,11 +175,13 @@ def nll_1d_dm2(
     plt.show()
 
 
-def change_nll(err_list, label):
+def change_nll(err_list, label, stop=1e-10):
+    
+    # plot the abs change in NLL (current - previous iteration) against iteration number
     fig = plt.figure()
     plt.semilogy(np.arange(1, len(err_list)+1), err_list, label='Optimise ' + label)
-    plt.plot([1, len(err_list)], [1e-10, 1e-10], label='Stopping condition')
-    plt.ylabel('Change in NLL\n(current - previous iteration)')
+    plt.plot([1, len(err_list)], [stop, stop], label='Stopping condition')
+    plt.ylabel('Absolute change in NLL\n(current - previous iteration)')
     plt.xlabel('Iteration number')
     plt.legend()
     plt.show()
@@ -162,6 +189,7 @@ def change_nll(err_list, label):
 
 def nll_2d_theta_dm2(min_func, N, theta_list, dm2_list):
     
+    # generate data to plot
     nll_list = np.zeros((N, N))
     for i in range(len(theta_list)):
         for j in range(len(dm2_list)):
@@ -173,7 +201,7 @@ def nll_2d_theta_dm2(min_func, N, theta_list, dm2_list):
 
     # possible colors: "YlGnBu", "Reds", "viridis", "bone", "nipy_spectral", "gist_ncar", "jet"
     for i in ["nipy_spectral"]:
-
+        # plot colours
         fig, axes = plt.subplots(2, 1, figsize=(7, 9), gridspec_kw={'height_ratios': [2, 1]})
         ax0 = axes[0]
         ax1 = axes[1]
@@ -185,7 +213,7 @@ def nll_2d_theta_dm2(min_func, N, theta_list, dm2_list):
         
         plt.subplot(2, 1, 2)
 
-        cntr1 = ax1.contourf(theta_list, dm2_list, nll_list, 300, cmap=i)
+        ax1.contourf(theta_list, dm2_list, nll_list, 300, cmap=i)
         ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
         ax1.set_ylabel(r"$\Delta m_{23}^2$ $[10^{-3}\/ \/eV^2]$")
         ax1.annotate ("b)", (-0.15, 1.00), xycoords="axes fraction")
@@ -211,6 +239,7 @@ def visual_one_method(
         plot_points=False
         ):
 
+    # generate data to plot
     theta_list = np.linspace(theta_low, theta_high, N)
     dm2_list = np.linspace(dm2_low, dm2_high, N)
 
@@ -223,6 +252,7 @@ def visual_one_method(
 
     nll_list = np.array(nll_list)
 
+    # plot colours
     fig, ax1 = plt.subplots(figsize=(6, 4))
     cntr1 = ax1.contourf(theta_list, dm2_list, nll_list, levels=500, cmap='nipy_spectral')
 
@@ -233,6 +263,7 @@ def visual_one_method(
     ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
     ax1.set_ylabel(r"$\Delta m_{23}^2$ $[10^{-3}\/ \/eV^2]$")
 
+    # plot contours
     cntr1.levels = cntr1.levels.tolist()
     ax1.contour(cntr1, levels=cntr1.levels[1:30:8], colors='w', alpha=0.5)
     ax1.contour(cntr1, levels=cntr1.levels[40:-1:42], colors='w', alpha=0.5)

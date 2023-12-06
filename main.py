@@ -42,6 +42,22 @@ if plot:
 # NLL against theta
 min_func = mi.Minimiser()
 
+if plot:
+    num = 100  # number of values to generate
+    theta_max = np.pi/2  # full range, whould have two minima
+    theta_min = 0
+
+    pl_func.nll_1d_theta(min_func, theta_min, theta_max, num, dm2=2.4)
+
+'''
+1D parabolic minimisor
+'''
+print('-'*30)
+print('--- 1D parabolic minimiser ---\n')
+
+print('dm2 = 2.4 e-3 used\n')
+
+# data lists
 num = 100  # number of values to generate
 theta_max = np.pi/2  # full range, whould have two minima
 theta_min = 0
@@ -54,18 +70,7 @@ for theta in theta_list:  # calculate NLL for each theta
 
 nll_list = np.array(nll_list)
 
-if plot:
-    pl_func.nll_1d_theta(theta_list, nll_list)
-
-
-'''
-1D parabolic minimisor
-'''
-print('-'*30)
-print('--- 1D parabolic minimiser ---\n')
-
-print('dm2 = 2.4 e-3 used\n')
-
+# parabolic minimiser
 theta_min, nll_min, err_list = min_func.parabolic_1d(
     x_list=theta_list, y_list=nll_list, stop_cond=1e-10)
 
@@ -201,7 +206,7 @@ dm2_guess = 2.25
     )
 
 # estimate error
-print('\n-- Uncertainties from Hessian --')
+print('\nUncertainties from Hessian')
 un.std_2(min_func, theta_min, dm2_min)
 
 # plot
@@ -243,7 +248,7 @@ dm2_guess = 2.25
      )
 
 # estimate error
-print('\n-- Uncertainties from Hessian --')
+print('\nUncertainties from Hessian')
 un.std_2(min_func, theta_min, dm2_min)
 
 # plot
@@ -284,7 +289,48 @@ dm2_guess = 2.35
      )
 
 # estimate error
-print('\n-- Uncertainties from Hessian --')
+print('\nUncertainties from Hessian')
+un.std_2(min_func, theta_min, dm2_min)
+
+# plot
+if plot:
+    pl_func.visual_one_method(
+            min_func,
+            N,
+            theta_low, theta_high,
+            dm2_low, dm2_high,
+            theta_min, dm2_min,
+            theta_plot, dm2_plot,
+            )
+
+if plot:
+    pl_func.change_nll(
+        err_list,
+        label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$"
+        )
+
+
+'''
+Gradient descent
+'''
+print()
+print('-'*24)
+print('--- Gradient descent ---\n')
+
+# gradient descent
+theta_guess = 0.65
+dm2_guess = 2.35
+
+(theta_min, dm2_min, nll_min,
+ err_list,
+ theta_plot, dm2_plot) = min_func.gradient_descent(
+     theta_guess, dm2_guess,
+     alpha=5e-5,
+     num_max=100, stop_cond=1e-10
+     )
+
+# estimate error
+print('\nUncertainties from Hessian')
 un.std_2(min_func, theta_min, dm2_min)
 
 # plot
@@ -310,28 +356,42 @@ Monte-Carlo method
 '''
 print()
 print('-'*26)
-print('--- Monte-Carlo method ---\n')
+print('--- Monte-Carlo method ---')
 
-# Monte-Carlo
-theta_guess = 0.75
-dm2_guess = 2.45
-T0 = 50
-step = 1e-2
+print('\n- Classical simulated annealing -\n')
 
+# inital guess same as before
+theta_guess = 0.65
+dm2_guess = 2.35
+T0 = 25
+step = 7.5e-3
+rho = 0.2
+stop_cond = 5e-4
+
+# initial guess to show it can find the global maxima
+# theta_guess = 0.75
+# dm2_guess = 2.6
+# T0 = 80
+# step = 1e-2
+# rho = 0.25
+# stop_cond = 1e-4
+
+# Monte-Carlo classical simulated annealing
 (theta_min, dm2_min, nll_min,
  err_list,
  theta_plot, dm2_plot) = min_func.Monte_Carlo(
-    theta_guess, dm2_guess,
-    T0, step,
-    num_max=1000, stop_cond=1e-10
-     )
+            theta_guess, dm2_guess,
+            T0, step, rho,
+            num_max=5000, stop_cond=stop_cond,
+            method='CSA'
+            )
 
 # estimate error
-print('\n-- Uncertainties from Hessian --')
+print('\nUncertainties from Hessian')
 un.std_2(min_func, theta_min, dm2_min)
 
 # plot
-if True:
+if plot:
     pl_func.visual_one_method(
             min_func,
             N,
@@ -344,5 +404,55 @@ if True:
 if plot:
     pl_func.change_nll(
         err_list,
-        label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$"
+        label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$",
+        stop=stop_cond
+        )
+
+
+print('\n- Fast simulated annealing -\n')
+
+# inital guess same as before
+theta_guess = 0.65
+dm2_guess = 2.35
+T0 = 25
+step = 5e-4
+stop_cond = 5e-6
+
+# initial guess to show it can find the global maxima
+# theta_guess = 0.75
+# dm2_guess = 2.6
+# T0 = 80
+# step = 2.5e-4
+# stop_cond = 5e-6
+
+# Monte-Carlo fast simulated annealing
+(theta_min, dm2_min, nll_min,
+ err_list,
+ theta_plot, dm2_plot) = min_func.Monte_Carlo(
+            theta_guess, dm2_guess,
+            T0, step,
+            num_max=5000, stop_cond=stop_cond,
+            method='FSA'
+            )
+
+# estimate error
+print('\nUncertainties from Hessian')
+un.std_2(min_func, theta_min, dm2_min)
+
+# plot
+if plot:
+    pl_func.visual_one_method(
+            min_func,
+            N,
+            theta_low, theta_high,
+            dm2_low, dm2_high,
+            theta_min, dm2_min,
+            theta_plot, dm2_plot,
+            )
+
+if plot:
+    pl_func.change_nll(
+        err_list,
+        label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$",
+        stop=stop_cond
         )
