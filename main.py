@@ -440,7 +440,7 @@ print('\nUncertainties from Hessian')
 un.std_2(min_func, theta_min, dm2_min)
 
 # plot
-if plot:
+if True:
     pl_func.visual_one_method(
             min_func,
             N,
@@ -450,9 +450,75 @@ if plot:
             theta_plot, dm2_plot,
             )
 
-if plot:
+if True:
     pl_func.change_nll(
         err_list,
         label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$",
         stop=stop_cond
         )
+
+
+# read number
+var_list = theta_plot
+var = r"$\theta_{23}$"
+num = 10
+
+def Gaussian(x, A, B, C): 
+    return A * np.exp(-(x-B)**2 / (2 * (C**2)))
+
+from scipy.optimize import curve_fit
+
+
+number, edges = np.histogram(var_list, bins=50)
+uncer = np.sqrt(number)/number.sum()  # uncertainty
+num = number/number.sum()  # normalised number
+bincenters = 0.5 * (edges[1:] + edges[:-1])
+widths = edges[1:] - edges[:-1]
+
+# plot
+img = plt.figure(1, figsize=(4,3))
+
+plt.bar(bincenters, num, widths, color='C1', label=f'Run MC {num} times')
+
+totalWeight = num.sum()
+print('Total weight =', totalWeight)
+
+plt.xlabel(var)
+plt.ylabel('Number of events')
+plt.show()
+
+
+xt1_mc=np.array(path_xt1)/(np.pi/4)
+xd1_mc=np.array(path_xd1)/(1e-3)
+
+num_t,edges_t=np.histogram(xt1_mc, bins=50)
+num_d,edges_d=np.histogram(xd1_mc, bins=50)
+centers_t=find_centers(edges_t)
+centers_d=find_centers(edges_d)
+
+index_t=find_max_index(num_t)
+index_d=find_max_index(num_d)
+
+fit_t, cov_t = curve_fit(Gaussian, centers_t, num_t, [max(num_t), centers_t[index_t], 0.001])
+fit_d, cov_d = curve_fit(Gaussian, centers_d, num_d, [max(num_d), centers_d[index_d], 0.001])
+
+xt_fit=np.linspace(edges_t[0],edges_t[-1],100)
+xd_fit=np.linspace(edges_d[0],edges_d[-1],100)
+
+yt_fit=Gauss(xt_fit,fit_t[0],fit_t[1],fit_t[2])
+yd_fit=Gauss(xd_fit,fit_d[0],fit_d[1],fit_d[2])
+
+print(u'  Δm^2=%.3fe-3, θ=%.3fπ/4'%(fit_d[1],fit_t[1]))
+
+
+fig,ax=plt.subplots()
+ax.plot(xt_fit,yt_fit)
+ax.hist(xt1_mc,bins=50)
+ax.set_xlabel(u'$θ_{23}$')
+  
+
+
+fig,ax=plt.subplots()
+ax.plot(xd_fit,yd_fit)
+ax.hist(xd1_mc,bins=50)
+ax.set_xlabel(u'$Δm_{23}^2$')
