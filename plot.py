@@ -4,6 +4,8 @@ Plot functions
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+
 
 import function as fc
 
@@ -280,3 +282,45 @@ def visual_one_method(
     
     ax1.legend()
     plt.show()
+
+
+def Gaussian(x, A, B, C): 
+    return A * np.exp(-(x-B)**2 / (2 * (C**2)))
+
+
+def fit_MC(var_list, var, N, plot=False):
+
+    # parameters for histogram
+    number, edges = np.histogram(var_list, bins=50)
+    num = number/number.sum()  # normalised number
+    bincenters = 0.5 * (edges[1:] + edges[:-1])
+    widths = edges[1:] - edges[:-1]
+
+    # fit Gaussian
+    ind_max = np.argmax(num)
+    fit, cov = curve_fit(Gaussian, bincenters, num, [max(num), bincenters[ind_max], 0.001])
+
+    # generate data to plot Gaussian
+    x_fit = np.linspace(edges[0], edges[-1], 1000)
+    y_fit = Gaussian(x_fit, *fit)
+
+    # print fit results
+    centre = fit[1]
+    std = np.sqrt(cov[1, 1])
+    print(f'Gaussian centre = {centre:.5f} +/- {std:.5f}')
+    print(f'with % error +/- {(std*100/centre):.3f}')
+
+    # plot
+    if plot:
+        plt.figure(1, figsize=(4,3))
+
+        plt.bar(bincenters, num, widths, label=f'Run MC {N} times')
+        plt.plot(x_fit, y_fit, color='C1', label=f'Gaussian fit')
+
+        totalweight = num.sum()
+        print('\nTotal weight =', totalweight)
+
+        plt.xlabel(var)
+        plt.ylabel('Frequency of events')
+        plt.legend()
+        plt.show()

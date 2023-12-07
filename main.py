@@ -86,9 +86,9 @@ if plot:
 '''
 Finding the accuracy using one std
 '''
-print('\n-- Uncertainty of theta_min --')
+print('\n- Uncertainty of theta_min -')
 
-print('\n--- Use NLL changes by +/- 1 in absolute units')
+print('\n-- Use NLL changes by +/- 1 in absolute units')
 
 # values
 theta_plus = np.pi/4  # upper bound for theta_min
@@ -96,7 +96,7 @@ theta_minus = theta_min - theta_min/10  # lower bound for theta_min
 nll_change = nll_min + 1  # upper and lower bound for NLL
 
 
-print('\n---- Select the closest value from a list')
+print('\n--- Select the closest value from a list')
 
 theta_stdup, theta_stddown = un.list(
     min_func,
@@ -107,7 +107,7 @@ print(f'\ntheta_min = {theta_min:.4f} +{(theta_stdup-theta_min):.4f} or {(theta_
 print(f'with % error +{((theta_stdup-theta_min)*100/theta_min):.2f} or {((theta_stddown-theta_min)*100/theta_min):.2f}')
 
 
-print('\n---- Use secant method to solve theta giving expected NLL')
+print('\n--- Use secant method to solve theta giving expected NLL')
 
 theta_stdup, nll_stdup = un.secant(
     min_func=min_func,
@@ -124,7 +124,7 @@ print(f'\ntheta_min = {theta_min:.4f} +{(theta_stdup-theta_min):.4f} or {(theta_
 print(f'with % error +{((theta_stdup-theta_min)*100/theta_min):.2f} or {((theta_stddown-theta_min)*100/theta_min):.2f}')
 
 
-print('\n---- Use Hessian and thus covariance matrix')
+print('\n--- Use Hessian and thus covariance matrix')
 
 hes = un.hessian(func=min_func.cal_nll, x=np.array([theta_min]))
 
@@ -358,6 +358,8 @@ print()
 print('-'*26)
 print('--- Monte-Carlo method ---')
 
+run_once = False
+
 print('\n- Classical simulated annealing -\n')
 
 # inital guess same as before
@@ -376,37 +378,63 @@ stop_cond = 5e-4
 # rho = 0.25
 # stop_cond = 1e-4
 
-# Monte-Carlo classical simulated annealing
-(theta_min, dm2_min, nll_min,
- err_list,
- theta_plot, dm2_plot) = min_func.Monte_Carlo(
-            theta_guess, dm2_guess,
-            T0, step, rho,
-            num_max=5000, stop_cond=stop_cond,
-            method='CSA'
+if run_once:
+    # Monte-Carlo classical simulated annealing
+    (theta_min, dm2_min, nll_min,
+    err_list,
+    theta_plot, dm2_plot) = min_func.Monte_Carlo(
+                theta_guess, dm2_guess,
+                T0, step, rho,
+                num_max=5000, stop_cond=stop_cond,
+                method='CSA'
+                )
+
+    # estimate error
+    print('\nUncertainties from Hessian')
+    un.std_2(min_func, theta_min, dm2_min)
+
+    # plot
+    if plot:
+        pl_func.visual_one_method(
+                min_func,
+                N,
+                theta_low, theta_high,
+                dm2_low, dm2_high,
+                theta_min, dm2_min,
+                theta_plot, dm2_plot,
+                )
+
+    if plot:
+        pl_func.change_nll(
+            err_list,
+            label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$",
+            stop=stop_cond
             )
 
-# estimate error
-print('\nUncertainties from Hessian')
-un.std_2(min_func, theta_min, dm2_min)
 
-# plot
-if plot:
-    pl_func.visual_one_method(
-            min_func,
-            N,
-            theta_low, theta_high,
-            dm2_low, dm2_high,
-            theta_min, dm2_min,
-            theta_plot, dm2_plot,
-            )
+# run MC N times and estimate minima by fitting Gaussian to the distribution
+N = 10
+print(f'\n-- Run CSA {N} times and estimate from distribution --')
 
-if plot:
-    pl_func.change_nll(
-        err_list,
-        label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$",
-        stop=stop_cond
+theta_entry = []
+dm2_entry = []
+for i in range(N):
+    # Monte-Carlo fast simulated annealing
+    _, _, _, _, theta_plot, dm2_plot = min_func.Monte_Carlo(
+        theta_guess, dm2_guess,
+        T0, step,
+        num_max=3000,
+        method='CSA',
+        printout=False
         )
+    theta_entry += theta_plot
+    dm2_entry += dm2_plot
+
+plot = True
+print('\ntheta_min')
+pl_func.fit_MC(var_list=theta_entry, var=r"$\theta_{23}$", N=N, plot=plot)
+print('\ndm2_min')
+pl_func.fit_MC(var_list=dm2_entry, var=r"$\Delta m_{23}^2$", N=N, plot=plot)
 
 
 print('\n- Fast simulated annealing -\n')
@@ -425,100 +453,60 @@ stop_cond = 5e-6
 # step = 2.5e-4
 # stop_cond = 5e-6
 
-# Monte-Carlo fast simulated annealing
-(theta_min, dm2_min, nll_min,
- err_list,
- theta_plot, dm2_plot) = min_func.Monte_Carlo(
-            theta_guess, dm2_guess,
-            T0, step,
-            num_max=5000, stop_cond=stop_cond,
-            method='FSA'
+if run_once:
+    # Monte-Carlo fast simulated annealing
+    (theta_min, dm2_min, nll_min,
+    err_list,
+    theta_plot, dm2_plot) = min_func.Monte_Carlo(
+                theta_guess, dm2_guess,
+                T0, step,
+                num_max=5000, stop_cond=stop_cond,
+                method='FSA'
+                )
+
+    # estimate error
+    print('\nUncertainties from Hessian')
+    un.std_2(min_func, theta_min, dm2_min)
+
+    # plot
+    if plot:
+        pl_func.visual_one_method(
+                min_func,
+                N,
+                theta_low, theta_high,
+                dm2_low, dm2_high,
+                theta_min, dm2_min,
+                theta_plot, dm2_plot,
+                )
+
+    if plot:
+        pl_func.change_nll(
+            err_list,
+            label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$",
+            stop=stop_cond
             )
 
-# estimate error
-print('\nUncertainties from Hessian')
-un.std_2(min_func, theta_min, dm2_min)
 
-# plot
-if True:
-    pl_func.visual_one_method(
-            min_func,
-            N,
-            theta_low, theta_high,
-            dm2_low, dm2_high,
-            theta_min, dm2_min,
-            theta_plot, dm2_plot,
-            )
+# run MC N times and estimate minima by fitting Gaussian to the distribution
+N = 10
+print(f'\n-- Run FSA {N} times and estimate from distribution --')
 
-if True:
-    pl_func.change_nll(
-        err_list,
-        label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$",
-        stop=stop_cond
+theta_entry = []
+dm2_entry = []
+for i in range(N):
+    # Monte-Carlo fast simulated annealing
+    _, _, _, _, theta_plot, dm2_plot = min_func.Monte_Carlo(
+        theta_guess, dm2_guess,
+        T0, step,
+        num_max=2000, stop_cond=stop_cond,
+        method='FSA',
+        printout=False
         )
+    theta_entry += theta_plot
+    dm2_entry += dm2_plot
 
-
-# read number
-var_list = theta_plot
-var = r"$\theta_{23}$"
-num = 10
-
-def Gaussian(x, A, B, C): 
-    return A * np.exp(-(x-B)**2 / (2 * (C**2)))
-
-from scipy.optimize import curve_fit
-
-
-number, edges = np.histogram(var_list, bins=50)
-uncer = np.sqrt(number)/number.sum()  # uncertainty
-num = number/number.sum()  # normalised number
-bincenters = 0.5 * (edges[1:] + edges[:-1])
-widths = edges[1:] - edges[:-1]
-
-# plot
-img = plt.figure(1, figsize=(4,3))
-
-plt.bar(bincenters, num, widths, color='C1', label=f'Run MC {num} times')
-
-totalWeight = num.sum()
-print('Total weight =', totalWeight)
-
-plt.xlabel(var)
-plt.ylabel('Number of events')
-plt.show()
-
-
-xt1_mc=np.array(path_xt1)/(np.pi/4)
-xd1_mc=np.array(path_xd1)/(1e-3)
-
-num_t,edges_t=np.histogram(xt1_mc, bins=50)
-num_d,edges_d=np.histogram(xd1_mc, bins=50)
-centers_t=find_centers(edges_t)
-centers_d=find_centers(edges_d)
-
-index_t=find_max_index(num_t)
-index_d=find_max_index(num_d)
-
-fit_t, cov_t = curve_fit(Gaussian, centers_t, num_t, [max(num_t), centers_t[index_t], 0.001])
-fit_d, cov_d = curve_fit(Gaussian, centers_d, num_d, [max(num_d), centers_d[index_d], 0.001])
-
-xt_fit=np.linspace(edges_t[0],edges_t[-1],100)
-xd_fit=np.linspace(edges_d[0],edges_d[-1],100)
-
-yt_fit=Gauss(xt_fit,fit_t[0],fit_t[1],fit_t[2])
-yd_fit=Gauss(xd_fit,fit_d[0],fit_d[1],fit_d[2])
-
-print(u'  Δm^2=%.3fe-3, θ=%.3fπ/4'%(fit_d[1],fit_t[1]))
-
-
-fig,ax=plt.subplots()
-ax.plot(xt_fit,yt_fit)
-ax.hist(xt1_mc,bins=50)
-ax.set_xlabel(u'$θ_{23}$')
-  
-
-
-fig,ax=plt.subplots()
-ax.plot(xd_fit,yd_fit)
-ax.hist(xd1_mc,bins=50)
-ax.set_xlabel(u'$Δm_{23}^2$')
+plot = False
+print('\ntheta_min')
+pl_func.fit_MC(var_list=theta_entry, var=r"$\theta_{23}$", N=N, plot=plot)
+print('\ndm2_min')
+pl_func.fit_MC(var_list=dm2_entry, var=r"$\Delta m_{23}^2$", N=N, plot=plot)

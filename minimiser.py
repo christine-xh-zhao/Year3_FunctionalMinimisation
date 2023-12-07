@@ -433,7 +433,8 @@ class Minimiser():
             theta_guess, dm2_guess,
             T0, step, rho=0.9,
             num_max=1000, stop_cond=1e-10,
-            method=''
+            method='',
+            printout=True
             ):
         """
         Monte-Carlo method using classical or fast simulated annealing with k_b = 1
@@ -504,12 +505,14 @@ class Minimiser():
             if err <= stop_cond:
                 theta_min, dm2_min, nll_min = theta_list[-1], dm2_list[-1], nll_list[-1]
                 
-                print(f'Stopping condition {stop_cond} reached after {num} iterations')
-                print(f'Minimum of nll = {nll_min} is at\ntheta = {theta_min}\ndm2 = {dm2_min} e-3')
+                if printout:
+                    print(f'Stopping condition {stop_cond} reached after {num} iterations')
+                    print(f'Minimum of nll = {nll_min} is at\ntheta = {theta_min}\ndm2 = {dm2_min} e-3')
                 break
 
             if num == num_max:
-                print(f'Max iterations {num_max} reached with stopping condition {stop_cond}')
+                if printout:
+                    print(f'Max iterations {num_max} reached with stopping condition {stop_cond}')
                 break
 
             # acceptance condition

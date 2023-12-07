@@ -110,6 +110,7 @@ def gradient(f, x):
         gradient.append((f2 - f1)/(2*h))
 
         x[i] = xx  # restore x[i]
+
     return np.array(gradient)
 
 
