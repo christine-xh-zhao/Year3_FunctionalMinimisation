@@ -76,7 +76,7 @@ def neutrino_prob_sing(energy, plot=True):
         text = r"$\theta_{23}$ = $\pi/4$" + "\n" + \
                r"$\Delta m^2_{23}$" + \
                r"= 2.4" + r" $10^{-3} eV^2$"
-        plt.annotate (text, (0.7, 0.1), xycoords="axes fraction", size=15, bbox=props)
+        plt.annotate (text, (0.65, 0.09), xycoords="axes fraction", size=12, bbox=props)
 
         plt.xlabel("Energy [GeV]")
         plt.ylabel(r"Survival Probability $\nu_\mu\rightarrow\nu_\mu$")
@@ -91,7 +91,7 @@ def neutrino_prob_mul(energy):
     fig = plt.figure()
     plt.plot(energy, fc.neutrino_prob(E=energy), label='default params')
     plt.plot(energy, fc.neutrino_prob(E=energy, theta=np.pi/8), '-.', label='halve theta')
-    plt.plot(energy, fc.neutrino_prob(E=energy, dm2=2.4/2), ':', label='halve del_m')
+    plt.plot(energy, fc.neutrino_prob(E=energy, dm2=2.4e-3/2), ':', label='halve del_m')
     plt.plot(energy, fc.neutrino_prob(E=energy, L=295/2), '--', label='halve L')
     plt.ylabel('prob')
     plt.xlabel('energy (GeV)')
@@ -101,7 +101,7 @@ def neutrino_prob_mul(energy):
 
 def data_with_prob(energy, data_unosc_prob, data_unosc, data_osc, width):
     fig = plt.figure()
-    plt.bar(energy, data_unosc_prob, width, color='C2', label='unoscillated x prob')
+    plt.bar(energy, data_unosc_prob, width, color='C2', label='unoscillated x prob\n(default params)')
     plt.ylabel('# of entries')
     plt.xlabel('energy (GeV)')
     plt.legend()
@@ -109,7 +109,7 @@ def data_with_prob(energy, data_unosc_prob, data_unosc, data_osc, width):
 
     fig = plt.figure()
     plt.bar(energy, data_unosc, width, color='C1', label='unoscillated')
-    plt.bar(energy, data_unosc_prob, width, color='C2', label='unoscillated x prob')
+    plt.bar(energy, data_unosc_prob, width, color='C2', label='unoscillated x prob\n(default params)')
     plt.bar(energy, data_osc, width, color='C4', label='oscillated', alpha=0.7)
     plt.ylabel('# of entries')
     plt.xlabel('energy (GeV)')
@@ -117,7 +117,7 @@ def data_with_prob(energy, data_unosc_prob, data_unosc, data_osc, width):
     plt.show()
 
     fig = plt.figure()
-    plt.bar(energy, data_unosc_prob, width, color='C2', label='unoscillated x prob')
+    plt.bar(energy, data_unosc_prob, width, color='C2', label='unoscillated x prob\n(default params)')
     plt.bar(energy, data_osc, width, color='C4', label='oscillated', alpha=0.7)
     plt.ylabel('# of entries')
     plt.xlabel('energy (GeV)')
@@ -210,18 +210,18 @@ def nll_2d_theta_dm2(min_func, N, theta_list, dm2_list):
         
         cntr0 = ax0.contourf(theta_list, dm2_list, nll_list, 300, cmap=i)
         ax0.set_xlabel(r"$\theta_{23}$ $[rad]$")
-        ax0.set_ylabel(r"$\Delta m_{23}^2$ $[10^{-3}\/ \/eV^2]$")
+        ax0.set_ylabel(r"$\Delta m_{23}^2$ $[eV^2]$")
         ax0.annotate ("a)", (-0.15, 1.00), xycoords = "axes fraction")
         
         plt.subplot(2, 1, 2)
 
         ax1.contourf(theta_list, dm2_list, nll_list, 300, cmap=i)
         ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
-        ax1.set_ylabel(r"$\Delta m_{23}^2$ $[10^{-3}\/ \/eV^2]$")
-        ax1.annotate ("b)", (-0.15, 1.00), xycoords="axes fraction")
+        ax1.set_ylabel(r"$\Delta m_{23}^2$ $[eV^2]$")
+        ax1.annotate ("b)", (-0.15, 1.10), xycoords="axes fraction")
                     
-        ax1.set_xlim(0.65, 0.9)
-        ax1.set_ylim(1.5, 3.5)
+        ax1.set_xlim(0.6, 0.95)
+        ax1.set_ylim(1.5e-3, 3.5e-3)
         
         plt.subplots_adjust(hspace=0.2, top=0.95, bottom=0.1)
 
@@ -263,7 +263,7 @@ def visual_one_method(
     ax1.plot(theta_min, dm2_min, 'x', color='red', label='Minimum')
 
     ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
-    ax1.set_ylabel(r"$\Delta m_{23}^2$ $[10^{-3}\/ \/eV^2]$")
+    ax1.set_ylabel(r"$\Delta m_{23}^2$ $[eV^2]$")
 
     # plot contours
     cntr1.levels = cntr1.levels.tolist()
@@ -307,7 +307,7 @@ def fit_MC(var_list, var, N, plot=False):
     # print fit results
     centre = fit[1]
     std = np.sqrt(cov[1, 1])
-    print(f'Gaussian centre = {centre:.5f} +/- {std:.5f}')
+    print(f'Gaussian centre = {centre:.7f} +/- {std:.7f}')
     print(f'with % error +/- {(std*100/centre):.3f}')
 
     # plot
@@ -322,5 +322,6 @@ def fit_MC(var_list, var, N, plot=False):
 
         plt.xlabel(var)
         plt.ylabel('Frequency of events')
+        plt.xticks(rotation=25)
         plt.legend()
         plt.show()

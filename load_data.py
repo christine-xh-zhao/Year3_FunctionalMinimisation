@@ -4,7 +4,6 @@ Load data function
 
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 class LoadData():
@@ -22,33 +21,6 @@ class LoadData():
 
         self.width = 0.05  # bin width
         self.energy = np.arange(0.025, 10, self.width)  # bin centre energy in GeV
-
-    def simple_plot(self, plot=False):
-        
-        # plot
-        self.plot = plot
-
-        if self.plot:
-            fig = plt.figure()
-            plt.bar(self.energy, self.data_osc, self.width, label='oscillated')
-            plt.ylabel('# of entries')
-            plt.xlabel('energy (GeV)')
-            plt.legend()
-
-            fig = plt.figure()
-            plt.bar(self.energy, self.data_unosc, self.width, label='unoscillated', color='C1')
-            plt.ylabel('# of entries')
-            plt.xlabel('energy (GeV)')
-            plt.legend()
-
-            fig = plt.figure()
-            plt.bar(self.energy, self.data_unosc, self.width, label='unoscillated', color='C1')
-            plt.bar(self.energy, self.data_osc, self.width, label='oscillated', color='C0')
-            plt.ylabel('# of entries')
-            plt.xlabel('energy (GeV)')
-            plt.legend()
-
-            plt.show()
 
     def get_data(self):
         self.data_energy()

@@ -6,7 +6,7 @@ import numpy as np
 import scipy as sp
 
 
-def neutrino_prob(E, theta=(np.pi)/4, dm2=2.4, L=295):
+def neutrino_prob(E, theta=(np.pi)/4, dm2=2.4e-3, L=295):
     """
     Probability that the muon neutrino will be observed as a muon neutrino and will not have oscillated into a tau or electron neutrino
     
@@ -18,7 +18,7 @@ def neutrino_prob(E, theta=(np.pi)/4, dm2=2.4, L=295):
     """
     
     sin1 = np.sin(2 * theta)
-    term = (1.267 * (dm2*1e-3) * L) / E
+    term = (1.267 * dm2 * L) / E
     sin2 = np.sin(term)
 
     return 1 - ((sin1**2)*(sin2**2))

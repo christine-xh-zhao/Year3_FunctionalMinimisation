@@ -108,6 +108,10 @@ def gradient(f, x):
 
         # calculate gradient
         gradient.append((f2 - f1)/(2*h))
+        # if i == 1:  # dm2 is multiplied by 1e-3 when calculating NLL change
+        #     gradient.append((f2 - f1)/(2*h*1e-3))
+        # else:
+        #     gradient.append((f2 - f1)/(2*h))
 
         x[i] = xx  # restore x[i]
 
@@ -123,7 +127,7 @@ def hessian(func, x):
     hessian = np.zeros((N, N))  # initialise
 
     for i in range(N):
-        h = abs(x[i]) *  np.finfo(np.float32).eps
+        h = abs(x[i]) *  np.finfo(np.float32).eps  # abs(x[i]) * difference between 1.0 and the next smallest representable float larger than 1.0
         xx = 1. * x[i]  # store x[i] but avoid shallow copy
 
         # lower bound
@@ -134,8 +138,12 @@ def hessian(func, x):
         x[i] = xx + h
         grad2 = gradient(func, x)
 
-        # calculate gradient
+        # calculate gradient of gradient
         hessian[i, :] = ((grad2 - grad1)/(2*h))
+        # if i == 1:  # dm2 is multiplied by 1e-3 when calculating NLL change
+        #     hessian[i, :] = ((grad2 - grad1)/(2*h*1e-3))
+        # else:
+        #     hessian[i, :] = ((grad2 - grad1)/(2*h))
 
         x[i] = xx  # restore x[i]
 
@@ -156,5 +164,5 @@ def std_2(min_func, theta_min, dm2_min):
     print(f'\ntheta_min = {theta_min:.4f} +/- {sig_theta:.4f}')
     print(f'with % error +/- {(sig_theta*100/theta_min):.2f}')
 
-    print(f'\ndm2_min = {dm2_min:.4f} +/- {sig_dm2:.4f}')
+    print(f'\ndm2_min = {dm2_min:.7f} +/- {sig_dm2:.7f}')
     print(f'with % error +/- {(sig_dm2*100/dm2_min):.2f}')

@@ -47,9 +47,9 @@ class Minimiser():
                     data_unosc_prob = self.data_unosc*prob
                 except:
                     pass
-                    # theta = params[0]; dm2 = params[1]
-                    # prob = fc.neutrino_prob(E=self.energy, theta=theta, dm2=dm2)
-                    # data_unosc_prob = self.data_unosc*prob
+                    theta = params[0]; dm2 = params[1], alpha = params[2]
+                    prob = fc.neutrino_prob(E=self.energy, theta=theta, dm2=dm2)
+                    data_unosc_prob = self.data_unosc*prob
             else:
                 theta = params[0]
                 prob = fc.neutrino_prob(E=self.energy, theta=theta)
@@ -200,7 +200,7 @@ class Minimiser():
 
             if err <= stop_cond:
                 print(f'Stopping condition {stop_cond} reached after {num} iterations')
-                print(f'Minimum of nll = {nll_min} is at\ntheta = {xmin}\ndm2 = {ymin} e-3')
+                print(f'Minimum of nll = {nll_min} is at\ntheta = {xmin}\ndm2 = {ymin}')
                 break
 
             if num == num_max:
@@ -241,7 +241,7 @@ class Minimiser():
 
             if err <= stop_cond:
                 print(f'Stopping condition {stop_cond} reached after {num} iterations')
-                print(f'Minimum of nll = {nll_min} is at\ntheta = {xmin}\ndm2 = {ymin} e-3')
+                print(f'Minimum of nll = {nll_min} is at\ntheta = {xmin}\ndm2 = {ymin}')
                 break
 
             if num == num_max:
@@ -251,7 +251,7 @@ class Minimiser():
             num += 1
             nll_old = 1. * nll_min
 
-        return xmin, ymin, nll_min, err_list, np.array(x_min), np.array(y_min), np.array(x_all), np.array(y_all)
+        return xmin, ymin, nll_min, err_list, x_min, y_min, x_all, y_all
 
     def Newtons(self, theta0, dm20, num_max=100, stop_cond=1e-10):
         """
@@ -294,7 +294,7 @@ class Minimiser():
 
             if err <= stop_cond:
                 print(f'Stopping condition {stop_cond} reached after {num} iterations')
-                print(f'Minimum of nll = {nll_new} is at\ntheta = {params_new[0]}\ndm2 = {params_new[1]} e-3')
+                print(f'Minimum of nll = {nll_new} is at\ntheta = {params_new[0]}\ndm2 = {params_new[1]}')
                 break
 
             if num == num_max:
@@ -317,8 +317,8 @@ class Minimiser():
         nll = self.cal_nll(params)
 
         N = len(params)
-        G = np.identity(N) 
-        grad = un.gradient(f=self.cal_nll, x=params)
+        G = np.identity(N)
+        grad = un.gradient(f=self.cal_nll, x=params) * alpha
 
         theta_list = []
         dm2_list = []
@@ -331,7 +331,7 @@ class Minimiser():
         num = 1
         while True:
             # inverse hessian
-            hes_inv = alpha * G
+            hes_inv = 1. * G
 
             # update parameters and nll
             params_new = params - np.dot(hes_inv, grad)
@@ -345,7 +345,7 @@ class Minimiser():
 
             if err <= stop_cond:
                 print(f'Stopping condition {stop_cond} reached after {num} iterations')
-                print(f'Minimum of nll = {nll_new} is at\ntheta = {params_new[0]}\ndm2 = {params_new[1]} e-3')
+                print(f'Minimum of nll = {nll_new} is at\ntheta = {params_new[0]}\ndm2 = {params_new[1]}')
                 break
 
             if num == num_max:
@@ -372,13 +372,6 @@ class Minimiser():
             nll = 1. * nll_new
             grad = 1. * grad_new
 
-            # increase alpha towards 1
-            expo = 6 - num
-            if expo > 0:
-                alpha = alpha * np.exp(expo)
-            else:
-                alpha = 1
-
         return params_new[0], params_new[1], nll_new, err_list, theta_list, dm2_list
 
     def gradient_descent(self, theta0, dm20, alpha, num_max=100, stop_cond=1e-10):
@@ -400,11 +393,14 @@ class Minimiser():
         # iterate
         num = 1
         while True:
-            # grad of function
+            # gradient of function
             grad = un.gradient(f=self.cal_nll, x=params)
 
+            # scale the alpha of dm2 gradient to similar magnitude as theta gradient
+            alpha_mat = [[alpha, 0], [0, alpha*1e-5]]
+
             # update parameters and nll
-            params_new = params - alpha * grad
+            params_new = params - np.dot(alpha_mat, grad)
             nll_new = self.cal_nll(params_new)
             theta_list += [params_new[0]]
             dm2_list += [params_new[1]]
@@ -415,7 +411,7 @@ class Minimiser():
 
             if err <= stop_cond:
                 print(f'Stopping condition {stop_cond} reached after {num} iterations')
-                print(f'Minimum of nll = {nll_new} is at\ntheta = {params_new[0]}\ndm2 = {params_new[1]} e-3')
+                print(f'Minimum of nll = {nll_new} is at\ntheta = {params_new[0]}\ndm2 = {params_new[1]}')
                 break
 
             if num == num_max:
@@ -507,7 +503,7 @@ class Minimiser():
                 
                 if printout:
                     print(f'Stopping condition {stop_cond} reached after {num} iterations')
-                    print(f'Minimum of nll = {nll_min} is at\ntheta = {theta_min}\ndm2 = {dm2_min} e-3')
+                    print(f'Minimum of nll = {nll_min} is at\ntheta = {theta_min}\ndm2 = {dm2_min}')
                 break
 
             if num == num_max:

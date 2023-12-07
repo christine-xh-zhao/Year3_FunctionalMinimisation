@@ -20,10 +20,10 @@ data_osc, data_unosc, energy, width = data.get_data()  # energy (GeV) in each bi
 if plot:
     pl_func.data(energy, data_osc, data_unosc, width)
 
-pl_func.data_aligned(energy, data_osc, data_unosc, width, plot=False)
+pl_func.data_aligned(energy, data_osc, data_unosc, width, plot=True)
 
 # calculate prob and plot
-pl_func.neutrino_prob_sing(energy, plot=False)
+pl_func.neutrino_prob_sing(energy, plot=True)
 
 if plot:
     pl_func.neutrino_prob_mul(energy)
@@ -143,10 +143,10 @@ print('-'*25)
 print('--- Univariate method ---\n')
 
 # plot a big 2D diagram
-if plot:
+if True:
     N = 100  # total number per dimension
     theta_list = np.linspace(0, np.pi/2, N)
-    dm2_list = np.linspace(0, 40, N)
+    dm2_list = np.linspace(0, 40e-3, N)
 
     pl_func.nll_2d_theta_dm2(min_func, N, theta_list, dm2_list)
 
@@ -154,7 +154,7 @@ if plot:
 # plot NLL against dm2
 if plot:
     num = 1000  # number of values to generate
-    dm2_max = 100
+    dm2_max = 100e-3
     dm2_min = 0
 
     pl_func.nll_1d_dm2(
@@ -166,8 +166,8 @@ if plot:
 
 if plot:
     num = 100  # number of values to generate
-    dm2_max = 2.7
-    dm2_min = 2.1
+    dm2_max = 2.7e-3
+    dm2_min = 2.1e-3
 
     pl_func.nll_1d_dm2(
             min_func,
@@ -181,20 +181,20 @@ if plot:
 N = 100  # total number per dimension
 
 # zoomed on four minima
-dm2_high = 2.7
-dm2_low = 2.1
+dm2_high = 2.7e-3
+dm2_low = 2.1e-3
 theta_high = 0.95
 theta_low = 0.62
 
 # zoomed on two minima
-# dm2_high = 2.4
-# dm2_low = 2.34
+# dm2_high = 2.4e-3
+# dm2_low = 2.34e-3
 # theta_high = 0.845
 # theta_low = 0.725
 
 # univariate
 theta_guess = 0.65
-dm2_guess = 2.25
+dm2_guess = 2.25e-3
 
 (theta_min, dm2_min, nll_min,
  err_list,
@@ -210,7 +210,7 @@ print('\nUncertainties from Hessian')
 un.std_2(min_func, theta_min, dm2_min)
 
 # plot
-if plot:
+if True:
     pl_func.visual_one_method(
             min_func,
             N,
@@ -238,7 +238,7 @@ print('--- Newton\'s method ---\n')
 
 # Newtons
 theta_guess = 0.65
-dm2_guess = 2.25
+dm2_guess = 2.25e-3
 
 (theta_min, dm2_min, nll_min,
  err_list,
@@ -252,7 +252,7 @@ print('\nUncertainties from Hessian')
 un.std_2(min_func, theta_min, dm2_min)
 
 # plot
-if plot:
+if True:
     pl_func.visual_one_method(
             min_func,
             N,
@@ -278,13 +278,13 @@ print('--- Quasi-Newton method ---\n')
 
 # Quasi-Newton
 theta_guess = 0.65
-dm2_guess = 2.35
+dm2_guess = 2.35e-3
 
 (theta_min, dm2_min, nll_min,
  err_list,
  theta_plot, dm2_plot) = min_func.quasi_Newton(
      theta_guess, dm2_guess,
-     alpha=1e-5,
+     alpha=3e-9,
      num_max=100, stop_cond=1e-10
      )
 
@@ -293,7 +293,7 @@ print('\nUncertainties from Hessian')
 un.std_2(min_func, theta_min, dm2_min)
 
 # plot
-if plot:
+if True:
     pl_func.visual_one_method(
             min_func,
             N,
@@ -319,13 +319,13 @@ print('--- Gradient descent ---\n')
 
 # gradient descent
 theta_guess = 0.65
-dm2_guess = 2.35
+dm2_guess = 2.35e-3
 
 (theta_min, dm2_min, nll_min,
  err_list,
  theta_plot, dm2_plot) = min_func.gradient_descent(
      theta_guess, dm2_guess,
-     alpha=5e-5,
+     alpha=3e-5,
      num_max=100, stop_cond=1e-10
      )
 
@@ -334,7 +334,7 @@ print('\nUncertainties from Hessian')
 un.std_2(min_func, theta_min, dm2_min)
 
 # plot
-if plot:
+if True:
     pl_func.visual_one_method(
             min_func,
             N,
@@ -353,6 +353,10 @@ if plot:
 
 '''
 Monte-Carlo method
+
+- MC is a random process
+- If the plots produced are not as expected, run the script few more times
+- Especially for CSA, since T decreases too slow, which means the distribution might be significantly messed up
 '''
 print()
 print('-'*26)
@@ -364,7 +368,7 @@ print('\n- Classical simulated annealing -\n')
 
 # inital guess same as before
 theta_guess = 0.65
-dm2_guess = 2.35
+dm2_guess = 2.35e-3
 T0 = 25
 step = 7.5e-3
 rho = 0.2
@@ -372,7 +376,7 @@ stop_cond = 5e-4
 
 # initial guess to show it can find the global maxima
 # theta_guess = 0.75
-# dm2_guess = 2.6
+# dm2_guess = 2.6e-3
 # T0 = 80
 # step = 1e-2
 # rho = 0.25
@@ -432,23 +436,23 @@ for i in range(N):
 
 plot = True
 print('\ntheta_min')
-pl_func.fit_MC(var_list=theta_entry, var=r"$\theta_{23}$", N=N, plot=plot)
+pl_func.fit_MC(var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$", N=N, plot=plot)
 print('\ndm2_min')
-pl_func.fit_MC(var_list=dm2_entry, var=r"$\Delta m_{23}^2$", N=N, plot=plot)
+pl_func.fit_MC(var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$", N=N, plot=plot)
 
 
 print('\n- Fast simulated annealing -\n')
 
 # inital guess same as before
 theta_guess = 0.65
-dm2_guess = 2.35
+dm2_guess = 2.35e-3
 T0 = 25
 step = 5e-4
 stop_cond = 5e-6
 
 # initial guess to show it can find the global maxima
 # theta_guess = 0.75
-# dm2_guess = 2.6
+# dm2_guess = 2.6e-3
 # T0 = 80
 # step = 2.5e-4
 # stop_cond = 5e-6
@@ -505,8 +509,8 @@ for i in range(N):
     theta_entry += theta_plot
     dm2_entry += dm2_plot
 
-plot = False
+plot = True
 print('\ntheta_min')
-pl_func.fit_MC(var_list=theta_entry, var=r"$\theta_{23}$", N=N, plot=plot)
+pl_func.fit_MC(var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$", N=N, plot=plot)
 print('\ndm2_min')
-pl_func.fit_MC(var_list=dm2_entry, var=r"$\Delta m_{23}^2$", N=N, plot=plot)
+pl_func.fit_MC(var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$", N=N, plot=plot)
