@@ -610,6 +610,7 @@ class Minimiser():
             params,
             T0, step, rho=0.9,
             num_max=1000, stop_cond=1e-10,
+            function=None,
             method='',
             printout=True
             ):
@@ -622,8 +623,10 @@ class Minimiser():
         # initialise
         params = np.array(params)
         dimension = params.shape[0]
-                  
-        nll = self.cal_nll(params)
+
+        if function == None:
+            function = self.cal_nll
+        nll = function(params)
         T = T0
 
         params_list = []
@@ -648,7 +651,7 @@ class Minimiser():
             
             # update
             params_new = params + params * rand_list * step
-            nll_new = self.cal_nll(params_new)
+            nll_new = function(params_new)
 
             # change in energy
             nll_diff = nll_new - nll

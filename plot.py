@@ -138,6 +138,8 @@ def data_aligned_3D(theta, dm2, alpha, plot=True):
 
 
 def neutrino_prob_sing(energy, plot=True):
+
+    # plot neutrino probability against energy
     if plot:
         fig = plt.figure()
         p = plt.plot(energy, fc.neutrino_prob(E=energy))
@@ -147,7 +149,7 @@ def neutrino_prob_sing(energy, plot=True):
         text = r"$\theta_{23}$ = $\pi/4$" + r" $[rad]$" + "\n" + \
                r"$\Delta m^2_{23}$" + \
                r"= 2.4" + r" $[10^{-3} \/ \/ eV^2]$"
-        plt.annotate(text, (0.625, 0.09), xycoords="axes fraction", size=12, bbox=props)
+        plt.annotate(text, (0.6, 0.09), xycoords="axes fraction", size=12, bbox=props)
 
         plt.xlabel("Energy [GeV]")
         plt.ylabel(r"Survival Probability $\nu_\mu\rightarrow\nu_\mu$")
@@ -171,6 +173,8 @@ def neutrino_prob_mul(energy):
 
 
 def data_with_prob(energy, data_unosc_prob, data_unosc, data_osc, width):
+
+    # plot number of entries for oscillated, unoscillated, and unoscillated x neutrino_prob against energy
     fig = plt.figure()
     plt.bar(energy, data_unosc_prob, width, color='C2', label='unoscillated x prob\n(default params)')
     plt.ylabel('# of entries')
@@ -213,7 +217,7 @@ def nll_1d_theta(
 
     nll_list = np.array(nll_list)
 
-    # plot theta against nll with fixted dm2
+    # plot theta against nll with fixted theta
     fig = plt.figure()
     plt.plot(theta_list, nll_list, label=f'dm2 = {dm2} e-3')
     plt.ylabel('NLL')
@@ -239,7 +243,7 @@ def nll_1d_dm2(
 
     nll_list = np.array(nll_list)
 
-    # plot dm2 against nll with fixed theta
+    # plot dm2 against nll with fixed dm2
     fig = plt.figure()
     plt.plot(dm2_list, nll_list, label=f'theta = {theta_min}')
     plt.ylabel('NLL')
@@ -267,7 +271,7 @@ def nll_1d_alpha(
 
         nll_list = np.array(nll_list)
 
-        # plot alpha against nll with fixed theta
+        # plot alpha against nll with fixed alpha
         fig = plt.figure()
         p = plt.plot(alpha_list, nll_list)
 
@@ -316,13 +320,14 @@ def nll_2d_theta_dm2(min_func, N, theta_list, dm2_list):
         ax0 = axes[0]
         ax1 = axes[1]
         
+        # big plot for large range
         cntr0 = ax0.contourf(theta_list, dm2_list, nll_list, 300, cmap=i)
         ax0.set_xlabel(r"$\theta_{23}$ $[rad]$")
         ax0.set_ylabel(r"$\Delta m_{23}^2$ $[eV^2]$")
         ax0.annotate ("a)", (-0.15, 1.00), xycoords = "axes fraction")
         
+        # zoomed in small plot around global minima
         plt.subplot(2, 1, 2)
-
         ax1.contourf(theta_list, dm2_list, nll_list, 300, cmap=i)
         ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
         ax1.set_ylabel(r"$\Delta m_{23}^2$ $[eV^2]$")
@@ -396,7 +401,11 @@ def Gaussian(x, A, B, C):
     return A * np.exp(-(x-B)**2 / (2 * (C**2)))
 
 
-def fit_MC(var_list, var, N, std_ratio=0.005, plot=False):
+def Lorentzian(x, amp, mean, width):
+    return amp * width**2 / (width**2 + (x - mean)**2)
+
+
+def fit_MC(var_list, var, N, std_ratio=0.005, Lorentz=False, plot=False):
 
     # parameters for histogram
     number, edges = np.histogram(var_list, bins=100)
@@ -408,7 +417,12 @@ def fit_MC(var_list, var, N, std_ratio=0.005, plot=False):
     ind_max = np.argmax(num)
     centre_guess = bincenters[ind_max]
     std_guess = centre_guess * std_ratio
-    fit, cov = curve_fit(Gaussian, bincenters, num, [max(num), centre_guess, std_guess])
+    if Lorentz:
+        print('Lorentzian fit')
+        fit, cov = curve_fit(Lorentzian, bincenters, num, [max(num), centre_guess, std_guess])
+    else:
+        print('Gaussian fit')
+        fit, cov = curve_fit(Gaussian, bincenters, num, [max(num), centre_guess, std_guess])
 
     # generate data to plot Gaussian
     x_fit = np.linspace(edges[0], edges[-1], 1000)
@@ -417,15 +431,23 @@ def fit_MC(var_list, var, N, std_ratio=0.005, plot=False):
     # print fit results
     centre = fit[1]
     std = np.sqrt(cov[1, 1])
-    print(f'Gaussian centre = {centre:.7f} +/- {std:.7f}')
+    print(f'Fit centre = {centre:.7f} +/- {std:.7f}')
     print(f'with % error +/- {(std*100/centre):.3f}')
 
     # plot
     if plot:
         plt.figure(1, figsize=(4,3))
 
-        plt.bar(bincenters, num, widths, label=f'Run MC {N} times')
-        plt.plot(x_fit, y_fit, color='C1', label=f'Gaussian fit')
+        if Lorentz:
+            label1 = 'FSA'
+            label2 = 'Lorentzian fit'
+        else:
+            label1 = 'CSA'
+            label2 = 'Gaussian fit'
+
+        plt.bar(bincenters, num, widths, label='Run ' + label1 + f' {N} times')
+
+        plt.plot(x_fit, y_fit, color='C1', label=label2)
 
         totalweight = num.sum()
         print('\nTotal weight =', totalweight)

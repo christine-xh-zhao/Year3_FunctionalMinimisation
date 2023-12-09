@@ -1,5 +1,5 @@
 """
-Main file for running code for 3D minimisation
+Main file for 3D minimisation
 """
 
 import minimiser as mi
@@ -76,14 +76,24 @@ for i in range(N_MC):
     dm2_entry += dm2_plot.tolist()
     alpha_entry += alpha_plot.tolist()
 
-# fit distribution with Gaussian
-plot_mul = plot
+# fit distribution with Lorentzian
+plot_mul = True
 print('\ntheta_min')
-theta_min, _ = pl_func.fit_MC(var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$", N=N_MC, plot=plot_mul)
+theta_min, _ = pl_func.fit_MC(
+    var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
+    N=N_MC, Lorentz=True, plot=plot_mul
+    )
 print('\ndm2_min')
-dm2_min, _ = pl_func.fit_MC(var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$", N=N_MC, plot=plot_mul)
+dm2_min, _ = pl_func.fit_MC(
+    var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$",
+    N=N_MC, Lorentz=True, plot=plot_mul
+    )
 print('\nalpha_min')
-alpha_min, _ = pl_func.fit_MC(var_list=alpha_entry, var=r"$\alpha$ $[a. u.]$", N=N_MC, plot=plot_mul)
+alpha_min, _ = pl_func.fit_MC(
+    var_list=alpha_entry, var=r"$\alpha$ $[a. u.]$",
+    N=N_MC, Lorentz=True, plot=plot_mul
+    )
+
 
 # estimate error
 print('\nUncertainties from Hessian')
