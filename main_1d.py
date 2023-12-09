@@ -2,21 +2,12 @@
 Main file for 1D minimisation and some other plots
 """
 
+import os
+import sys
 import numpy as np
 
 import function as fc
 import load_data as ld
-import minimiser as mi
-import uncertainty as un
-import plot as pl_func
-
-import io
-import os
-import sys
-import numpy as np
-from PIL import Image
-import matplotlib.pyplot as plt
-
 import minimiser as mi
 import uncertainty as un
 import plot as pl_func
@@ -75,7 +66,7 @@ if plot:
 
 # plot a big 2D diagram
 if True:
-    N = 100  # total number per dimension
+    N = 1000  # total number per dimension
     theta_list = np.linspace(0, np.pi/2, N)
     dm2_list = np.linspace(0, 40e-3, N)
 
@@ -92,7 +83,7 @@ if plot:
             min_func,
             dm2_min, dm2_max,
             num,
-            theta_min
+            theta_min=np.pi/4
             )
 
 if plot:
@@ -104,7 +95,7 @@ if plot:
             min_func,
             dm2_min, dm2_max,
             num,
-            theta_min
+            theta_min=np.pi/4
             )
 
 

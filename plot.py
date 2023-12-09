@@ -387,7 +387,7 @@ def nll_2d_theta_dm2(min_func, N, theta_list, dm2_list, dir_folder):
         plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
                     bbox_inches='tight')
         png2 = Image.open(png1)
-        png2.save(dir_folder + f"/nll_vs_alpha.tiff")
+        png2.save(dir_folder + f"/nll_vs_theta-dm2.tiff")
         png1.close()
 
         plt.show()

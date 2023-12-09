@@ -2,12 +2,8 @@
 Main file for 3D minimisation
 """
 
-import io
 import os
 import sys
-import numpy as np
-from PIL import Image
-import matplotlib.pyplot as plt
 
 import minimiser as mi
 import uncertainty as un
@@ -97,7 +93,7 @@ for i in range(N_MC):
     alpha_entry += alpha_plot.tolist()
 
 # fit distribution with Lorentzian
-plot_mul = True
+plot_mul = plot
 print('\ntheta_min')
 theta_min, _ = pl_func.fit_MC(
     var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
@@ -161,7 +157,7 @@ for i in range(N_MC):
     alpha_entry += alpha_plot.tolist()
 
 # fit distribution with Gaussian
-plot_mul = True
+plot_mul = plot
 print('\ntheta_min')
 theta_min, _ = pl_func.fit_MC(
     var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
