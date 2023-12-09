@@ -2,11 +2,31 @@
 Main file for 3D minimisation
 """
 
+import io
+import os
+import sys
+import numpy as np
+from PIL import Image
+import matplotlib.pyplot as plt
+
 import minimiser as mi
 import uncertainty as un
 import plot as pl_func
 
+# plot one method per graph
 plot = False
+
+
+# set the directory path
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(dir_path)
+
+# make new folder
+folder_name = '/plots-3D'
+dir_folder = dir_path + folder_name
+filename = dir_folder + '/placeholder.txt'
+os.makedirs(os.path.dirname(filename), exist_ok=True)
+
 
 # minimisation class
 min_func = mi.Minimiser()
@@ -141,13 +161,22 @@ for i in range(N_MC):
     alpha_entry += alpha_plot.tolist()
 
 # fit distribution with Gaussian
-plot_mul = plot
+plot_mul = True
 print('\ntheta_min')
-theta_min, _ = pl_func.fit_MC(var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$", N=N_MC, plot=plot_mul)
+theta_min, _ = pl_func.fit_MC(
+    var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
+    N=N_MC, plot=plot_mul
+    )
 print('\ndm2_min')
-dm2_min, _ = pl_func.fit_MC(var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$", N=N_MC, plot=plot_mul)
+dm2_min, _ = pl_func.fit_MC(
+    var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$",
+    N=N_MC, plot=plot_mul
+    )
 print('\nalpha_min')
-alpha_min, _ = pl_func.fit_MC(var_list=alpha_entry, var=r"$\alpha$ $[a. u.]$", N=N_MC, plot=plot_mul)
+alpha_min, _ = pl_func.fit_MC(
+    var_list=alpha_entry, var=r"$\alpha$ $[a. u.]$",
+    N=N_MC, plot=plot_mul
+    )
 
 # estimate error
 print('\nUncertainties from Hessian')
@@ -296,4 +325,4 @@ if plot:
 '''
 Plot to compare with the observed data
 '''
-pl_func.data_aligned_3D(theta_new, dm2_new, alpha_new, plot=True)
+pl_func.data_aligned_3D(theta_new, dm2_new, alpha_new, dir_folder, plot=True)

@@ -2,7 +2,11 @@
 Main file for 2D minimisation
 """
 
+import io
+import os
+import sys
 import numpy as np
+from PIL import Image
 import matplotlib.pyplot as plt
 
 import minimiser as mi
@@ -11,6 +15,18 @@ import plot as pl_func
 
 # plot one method per graph
 plot = False
+
+
+# set the directory path
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(dir_path)
+
+# make new folder
+folder_name = '/plots-2D'
+dir_folder = dir_path + folder_name
+filename = dir_folder + '/placeholder.txt'
+os.makedirs(os.path.dirname(filename), exist_ok=True)
+
 
 # minimisation class
 min_func = mi.Minimiser()
@@ -271,6 +287,14 @@ if plot_all:
     ax1.quiver(X, Y, U, V, color="silver", angles='xy', scale_units='xy', scale=1, label='Gradient descent')
 
     ax1.legend()
+
+    png1 = io.BytesIO()
+    plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
+                bbox_inches='tight')
+    png2 = Image.open(png1)
+    png2.save(dir_folder + "/visualise-4-methods.tiff")
+    png1.close()
+
     plt.show()
 
 
@@ -445,6 +469,14 @@ if plot_all:
     ax1.quiver(X, Y, U, V, color="white", angles='xy', scale_units='xy', scale=1, label='FSA')
 
     ax1.legend()
+
+    png1 = io.BytesIO()
+    plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
+                bbox_inches='tight')
+    png2 = Image.open(png1)
+    png2.save(dir_folder + "/visualise-2-MCs.tiff")
+    png1.close()
+
     plt.show()
 
 
@@ -490,12 +522,12 @@ plot_mul = True
 print('\ntheta_min')
 theta_min, _ = pl_func.fit_MC(
     var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
-    N=N_MC, plot=plot_mul
+    N=N_MC, dir_folder=dir_folder, var_string='theta', plot=plot_mul
     )
 print('\ndm2_min')
 dm2_min, _ = pl_func.fit_MC(
     var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$",
-    N=N_MC, plot=plot_mul
+    N=N_MC, dir_folder=dir_folder, var_string='dm2', plot=plot_mul
     )
 
 # estimate error
@@ -543,12 +575,12 @@ plot_mul = True
 print('\ntheta_min')
 theta_min, _ = pl_func.fit_MC(
     var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
-    N=N_MC, Lorentz=True, plot=plot_mul
+    N=N_MC, dir_folder=dir_folder, var_string='theta', Lorentz=True, plot=plot_mul
     )
 print('\ndm2_min')
 dm2_min, _ = pl_func.fit_MC(
     var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$",
-    N=N_MC, Lorentz=True, plot=plot_mul
+    N=N_MC, dir_folder=dir_folder, var_string='dm2', Lorentz=True, plot=plot_mul
     )
 
 # estimate error
@@ -559,4 +591,4 @@ un.std_2(min_func, theta_min, dm2_min)
 '''
 Plot to compare with the observed data
 '''
-pl_func.data_aligned_2D(theta_new, dm2_new, plot=True)
+pl_func.data_aligned_2D(theta_new, dm2_new, dir_folder, plot=True)

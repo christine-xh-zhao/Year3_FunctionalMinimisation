@@ -2,7 +2,9 @@
 Plot functions
 """
 
+import io
 import numpy as np
+from PIL import Image
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
@@ -36,7 +38,7 @@ def data(energy, data_osc, data_unosc, width):
     plt.show()
 
 
-def data_aligned(energy, data_osc, data_unosc, width, plot=True):
+def data_aligned(energy, data_osc, data_unosc, width, dir_folder, plot=True):
 
     # plot energy against raw data, oscillated and unoscillated, and align their peaks
     if plot:
@@ -63,10 +65,18 @@ def data_aligned(energy, data_osc, data_unosc, width, plot=True):
 
         ax.legend()
         ax.grid(lw=0.4)
+
+        png1 = io.BytesIO()
+        plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
+                    bbox_inches='tight')
+        png2 = Image.open(png1)
+        png2.save(dir_folder + f"/data_aligned_1D.tiff")
+        png1.close()
+
         plt.show()
 
 
-def data_aligned_2D(theta, dm2, plot=True):
+def data_aligned_2D(theta, dm2, dir_folder, plot=True):
 
     # plot energy against raw data, oscillated and unoscillated, and align their peaks
     if plot:
@@ -98,10 +108,18 @@ def data_aligned_2D(theta, dm2, plot=True):
 
         ax.legend()
         ax.grid(lw=0.4)
+
+        png1 = io.BytesIO()
+        plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
+                    bbox_inches='tight')
+        png2 = Image.open(png1)
+        png2.save(dir_folder + f"/data_aligned_2D.tiff")
+        png1.close()
+
         plt.show()
 
 
-def data_aligned_3D(theta, dm2, alpha, plot=True):
+def data_aligned_3D(theta, dm2, alpha, dir_folder, plot=True):
 
     # plot energy against raw data, oscillated and unoscillated, and align their peaks
     if plot:
@@ -134,10 +152,18 @@ def data_aligned_3D(theta, dm2, alpha, plot=True):
 
         ax.legend()
         ax.grid(lw=0.4)
+
+        png1 = io.BytesIO()
+        plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
+                    bbox_inches='tight')
+        png2 = Image.open(png1)
+        png2.save(dir_folder + f"/data_aligned_3D.tiff")
+        png1.close()
+
         plt.show()
 
 
-def neutrino_prob_sing(energy, plot=True):
+def neutrino_prob_sing(energy, dir_folder, plot=True):
 
     # plot neutrino probability against energy
     if plot:
@@ -155,6 +181,14 @@ def neutrino_prob_sing(energy, plot=True):
         plt.ylabel(r"Survival Probability $\nu_\mu\rightarrow\nu_\mu$")
 
         plt.grid(lw=0.4)
+
+        png1 = io.BytesIO()
+        plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
+                    bbox_inches='tight')
+        png2 = Image.open(png1)
+        png2.save(dir_folder + f"/neutrino_probability.tiff")
+        png1.close()
+
         plt.show()
 
 
@@ -256,6 +290,7 @@ def nll_1d_alpha(
         min_func,
         alpha_min, alpha_max,
         num,
+        dir_folder,        
         theta=np.pi/4, dm2=2.4e-3,
         plot=True
         ):
@@ -286,6 +321,14 @@ def nll_1d_alpha(
         plt.xlabel(r'$\alpha$' + r" $[a. u.]$")
 
         plt.grid(lw=0.4)
+
+        png1 = io.BytesIO()
+        plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
+                    bbox_inches='tight')
+        png2 = Image.open(png1)
+        png2.save(dir_folder + f"/nll_vs_alpha.tiff")
+        png1.close()
+
         plt.show()
 
 
@@ -301,7 +344,7 @@ def change_nll(err_list, label, stop=1e-10):
     plt.show()
 
 
-def nll_2d_theta_dm2(min_func, N, theta_list, dm2_list):
+def nll_2d_theta_dm2(min_func, N, theta_list, dm2_list, dir_folder):
     
     # generate data to plot
     nll_list = np.zeros((N, N))
@@ -339,6 +382,13 @@ def nll_2d_theta_dm2(min_func, N, theta_list, dm2_list):
         plt.subplots_adjust(hspace=0.2, top=0.95, bottom=0.1)
 
         fig.colorbar(cntr0, ax=axes, label="Negative Log Likelihood")
+
+        png1 = io.BytesIO()
+        plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
+                    bbox_inches='tight')
+        png2 = Image.open(png1)
+        png2.save(dir_folder + f"/nll_vs_alpha.tiff")
+        png1.close()
 
         plt.show()
 
@@ -405,7 +455,7 @@ def Lorentzian(x, amp, mean, width):
     return amp * width**2 / (width**2 + (x - mean)**2)
 
 
-def fit_MC(var_list, var, N, std_ratio=0.005, Lorentz=False, plot=False):
+def fit_MC(var_list, var, N, dir_folder=None, var_string='', std_ratio=0.005, Lorentz=False, plot=False):
 
     # parameters for histogram
     number, edges = np.histogram(var_list, bins=100)
@@ -456,6 +506,15 @@ def fit_MC(var_list, var, N, std_ratio=0.005, Lorentz=False, plot=False):
         plt.ylabel('Frequency of events')
         plt.xticks(rotation=25)
         plt.legend()
-        plt.show()
     
+        if dir_folder is not None:
+            png1 = io.BytesIO()
+            plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
+                        bbox_inches='tight')
+            png2 = Image.open(png1)
+            png2.save(dir_folder + f"/MC-{label1}-{var_string}.tiff")
+            png1.close()
+
+        plt.show()
+
     return centre, std

@@ -10,7 +10,31 @@ import minimiser as mi
 import uncertainty as un
 import plot as pl_func
 
+import io
+import os
+import sys
+import numpy as np
+from PIL import Image
+import matplotlib.pyplot as plt
+
+import minimiser as mi
+import uncertainty as un
+import plot as pl_func
+
+# plot one method per graph
 plot = False
+
+
+# set the directory path
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(dir_path)
+
+# make new folder
+folder_name = '/plots-1D'
+dir_folder = dir_path + folder_name
+filename = dir_folder + '/placeholder.txt'
+os.makedirs(os.path.dirname(filename), exist_ok=True)
+
 
 # load data
 data = ld.LoadData()
@@ -19,10 +43,10 @@ data_osc, data_unosc, energy, width = data.get_data()  # energy (GeV) in each bi
 if plot:
     pl_func.data(energy, data_osc, data_unosc, width)
 
-pl_func.data_aligned(energy, data_osc, data_unosc, width, plot=True)
+pl_func.data_aligned(energy, data_osc, data_unosc, width, dir_folder, plot=True)
 
 # calculate prob and plot
-pl_func.neutrino_prob_sing(energy, plot=True)
+pl_func.neutrino_prob_sing(energy, dir_folder, plot=True)
 
 if plot:
     pl_func.neutrino_prob_mul(energy)
@@ -55,7 +79,7 @@ if True:
     theta_list = np.linspace(0, np.pi/2, N)
     dm2_list = np.linspace(0, 40e-3, N)
 
-    pl_func.nll_2d_theta_dm2(min_func, N, theta_list, dm2_list)
+    pl_func.nll_2d_theta_dm2(min_func, N, theta_list, dm2_list, dir_folder)
 
 
 # plot NLL against dm2
@@ -94,6 +118,7 @@ if True:
             min_func,
             alpha_min, alpha_max,
             num,
+            dir_folder,
             theta=np.pi/4, dm2=2.4e-3,
             plot=True
             )
