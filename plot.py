@@ -463,7 +463,7 @@ def fit_MC(var_list, var, N, dir_folder=None, var_string='', std_ratio=0.005, Lo
     bincenters = 0.5 * (edges[1:] + edges[:-1])
     widths = edges[1:] - edges[:-1]
 
-    # fit Gaussian
+    # fit Gaussian or Lorentzian
     ind_max = np.argmax(num)
     centre_guess = bincenters[ind_max]
     std_guess = centre_guess * std_ratio

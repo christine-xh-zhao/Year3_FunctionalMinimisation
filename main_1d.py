@@ -75,7 +75,7 @@ if True:
 
 # plot NLL against dm2
 if plot:
-    num = 1000  # number of values to generate
+    num = 100  # number of values to generate, use 1000 to regenerate the plot in report
     dm2_max = 100e-3
     dm2_min = 0
 
