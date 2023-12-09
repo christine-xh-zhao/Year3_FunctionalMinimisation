@@ -95,7 +95,9 @@ def gradient(f, x):
     gradient = []
 
     for i in range(N):
-        h = abs(x[i]) *  np.finfo(np.float32).eps  # abs(x[i]) * difference between 1.0 and the next smallest representable float larger than 1.0
+        # abs(x[i]) * difference between 1.0 and the next smallest representable float larger than 1.0
+        # np.finfo(np.float32).eps = 1.1920929e-07
+        h = abs(x[i]) *  np.finfo(np.float32).eps
         xx = 1. * x[i]  # store x[i] but avoid shallow copy
 
         # lower bound
@@ -108,12 +110,8 @@ def gradient(f, x):
 
         # calculate gradient
         gradient.append((f2 - f1)/(2*h))
-        # if i == 1:  # dm2 is multiplied by 1e-3 when calculating NLL change
-        #     gradient.append((f2 - f1)/(2*h*1e-3))
-        # else:
-        #     gradient.append((f2 - f1)/(2*h))
 
-        x[i] = xx  # restore x[i]
+        x[i] = 1. * xx  # restore x[i]
 
     return np.array(gradient)
 
@@ -127,7 +125,9 @@ def hessian(func, x):
     hessian = np.zeros((N, N))  # initialise
 
     for i in range(N):
-        h = abs(x[i]) *  np.finfo(np.float32).eps  # abs(x[i]) * difference between 1.0 and the next smallest representable float larger than 1.0
+        # abs(x[i]) * difference between 1.0 and the next smallest representable float larger than 1.0
+        # np.finfo(np.float32).eps = 1.1920929e-07
+        h = abs(x[i]) *  np.finfo(np.float32).eps
         xx = 1. * x[i]  # store x[i] but avoid shallow copy
 
         # lower bound
@@ -140,12 +140,8 @@ def hessian(func, x):
 
         # calculate gradient of gradient
         hessian[i, :] = ((grad2 - grad1)/(2*h))
-        # if i == 1:  # dm2 is multiplied by 1e-3 when calculating NLL change
-        #     hessian[i, :] = ((grad2 - grad1)/(2*h*1e-3))
-        # else:
-        #     hessian[i, :] = ((grad2 - grad1)/(2*h))
 
-        x[i] = xx  # restore x[i]
+        x[i] = 1. * xx  # restore x[i]
 
     return hessian
 
@@ -166,3 +162,25 @@ def std_2(min_func, theta_min, dm2_min):
 
     print(f'\ndm2_min = {dm2_min:.7f} +/- {sig_dm2:.7f}')
     print(f'with % error +/- {(sig_dm2*100/dm2_min):.2f}')
+
+
+def std_3(min_func, theta_min, dm2_min, alpha_min):
+    """
+    Calculate standard deviation for minimised theta and dm2
+    """
+    
+    hes = hessian(func=min_func.cal_nll, x=np.array([theta_min, dm2_min, alpha_min]))
+    
+    hes_inv = np.linalg.inv(hes)  # inverse hessian to get covariance
+    sig_theta = np.sqrt(2) * np.sqrt(hes_inv[0][0])  # std is sqrt of covariance diagonal
+    sig_dm2 = np.sqrt(2) * np.sqrt(hes_inv[1][1])
+    sig_alpha = np.sqrt(2) * np.sqrt(hes_inv[2][2])
+
+    print(f'\ntheta_min = {theta_min:.4f} +/- {sig_theta:.4f}')
+    print(f'with % error +/- {(sig_theta*100/theta_min):.2f}')
+
+    print(f'\ndm2_min = {dm2_min:.7f} +/- {sig_dm2:.7f}')
+    print(f'with % error +/- {(sig_dm2*100/dm2_min):.2f}')
+
+    print(f'\nalpha_min = {alpha_min:.7f} +/- {sig_alpha:.7f}')
+    print(f'with % error +/- {(sig_alpha*100/alpha_min):.2f}')

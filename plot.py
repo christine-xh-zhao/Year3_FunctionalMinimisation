@@ -288,17 +288,19 @@ def Gaussian(x, A, B, C):
     return A * np.exp(-(x-B)**2 / (2 * (C**2)))
 
 
-def fit_MC(var_list, var, N, plot=False):
+def fit_MC(var_list, var, N, std_ratio=0.005, plot=False):
 
     # parameters for histogram
-    number, edges = np.histogram(var_list, bins=50)
+    number, edges = np.histogram(var_list, bins=100)
     num = number/number.sum()  # normalised number
     bincenters = 0.5 * (edges[1:] + edges[:-1])
     widths = edges[1:] - edges[:-1]
 
     # fit Gaussian
     ind_max = np.argmax(num)
-    fit, cov = curve_fit(Gaussian, bincenters, num, [max(num), bincenters[ind_max], 0.001])
+    centre_guess = bincenters[ind_max]
+    std_guess = centre_guess * std_ratio
+    fit, cov = curve_fit(Gaussian, bincenters, num, [max(num), centre_guess, std_guess])
 
     # generate data to plot Gaussian
     x_fit = np.linspace(edges[0], edges[-1], 1000)
@@ -325,3 +327,5 @@ def fit_MC(var_list, var, N, plot=False):
         plt.xticks(rotation=25)
         plt.legend()
         plt.show()
+    
+    return centre, std
