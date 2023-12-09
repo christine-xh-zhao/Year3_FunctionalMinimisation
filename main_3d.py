@@ -233,6 +233,7 @@ params, nll_min, err_list, params_list = min_func.Newtons(
     )
 
 theta_min, dm2_min, alpha_min = params[0], params[1], params[2]
+theta_new, dm2_new, alpha_new = theta_min, dm2_min, alpha_min  # save values for plotting later
 theta_plot, dm2_plot, alpha_plot = params_list[0], params_list[1], params_list[2]
 
 # estimate error
@@ -280,3 +281,9 @@ if plot:
         label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$" + ' & ' + r"$\alpha$",
         stop=stop_cond
         )
+
+
+'''
+Plot to compare with the observed data
+'''
+pl_func.data_aligned_3D(theta_new, dm2_new, alpha_new, plot=True)

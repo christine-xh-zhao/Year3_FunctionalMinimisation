@@ -8,6 +8,7 @@ from scipy.optimize import curve_fit
 
 
 import function as fc
+import load_data as ld
 
 
 def data(energy, data_osc, data_unosc, width):
@@ -47,10 +48,9 @@ def data_aligned(energy, data_osc, data_unosc, width, plot=True):
 
         ax.bar(energy, data_osc, width, align="edge", color=col_ax, alpha=0.9,
                label="Observed (oscillated)")
-        ax.bar(0, 0, color=col_ax2, label="Simulated (not osicllated)")
+        ax.bar(1, 0, color=col_ax2, label="Simulated (unoscillated)")
         
-        ax2.bar(energy, data_unosc, width, align="edge", color=col_ax2, alpha=0.75,
-                label="Simulated (not osicllated)")
+        ax2.bar(energy, data_unosc, width, align="edge", color=col_ax2, alpha=0.75)
 
         ax.set_xlabel("Energy [GeV]")
         ax.set_ylabel(r"# of entries (oscillated $\nu_\mu$)", color=col_ax)
@@ -66,6 +66,77 @@ def data_aligned(energy, data_osc, data_unosc, width, plot=True):
         plt.show()
 
 
+def data_aligned_2D(theta, dm2, plot=True):
+
+    # plot energy against raw data, oscillated and unoscillated, and align their peaks
+    if plot:
+        # load data
+        data = ld.LoadData()
+        data_osc, data_unosc, energy, width = data.get_data()  # energy (GeV) in each bin
+
+        # colour
+        col_ax = 'C2'
+        col_ax2 = 'C4'
+
+        fig, ax = plt.subplots()
+
+        ax.bar(energy, data_osc, width, align="edge", color=col_ax, alpha=0.9,
+               label="Observed")
+
+        prob = fc.neutrino_prob(E=energy, theta=theta, dm2=dm2)
+        data_unosc_prob = data_unosc*prob
+
+        ax.bar(energy, data_unosc_prob, width, align="edge", color=col_ax2, alpha=0.75,
+               label="Expected")
+
+        ax.bar(10, 10, color='w',
+               label=r"$\theta_{23}$ = " + f'{theta:.3f}' + r" $[rad]$" + "\n" + \
+                r"$\Delta m^2_{23}$ = " + f'{dm2*1e3:.3f}' + r" $[10^{-3} \/ \/ eV^2]$")
+
+        ax.set_xlabel("Energy [GeV]")
+        ax.set_ylabel(r"# of $\nu_\mu$ entries")
+
+        ax.legend()
+        ax.grid(lw=0.4)
+        plt.show()
+
+
+def data_aligned_3D(theta, dm2, alpha, plot=True):
+
+    # plot energy against raw data, oscillated and unoscillated, and align their peaks
+    if plot:
+        # load data
+        data = ld.LoadData()
+        data_osc, data_unosc, energy, width = data.get_data()  # energy (GeV) in each bin
+
+        # colour
+        col_ax = 'C2'
+        col_ax2 = 'C4'
+
+        fig, ax = plt.subplots()
+
+        ax.bar(energy, data_osc, width, align="edge", color=col_ax, alpha=0.9,
+               label="Observed")
+
+        prob = fc.neutrino_prob(E=energy, theta=theta, dm2=dm2)
+        data_unosc_prob = data_unosc * energy * prob * alpha
+
+        ax.bar(energy, data_unosc_prob, width, align="edge", color=col_ax2, alpha=0.75,
+               label="Expected")
+
+        ax.bar(10, 10, color='w',
+               label=r"$\theta_{23}$ = " + f'{theta:.3f}' + r" $[rad]$" + "\n" + \
+                r"$\Delta m^2_{23}$ = " + f'{dm2*1e3:.3f}' + r" $[10^{-3} \/ \/ eV^2]$" + "\n" + \
+                r"$\alpha$ = " + f'{alpha:.3f}' + r" $[a. u.]$")
+
+        ax.set_xlabel("Energy [GeV]")
+        ax.set_ylabel(r"# of $\nu_\mu$ entries")
+
+        ax.legend()
+        ax.grid(lw=0.4)
+        plt.show()
+
+
 def neutrino_prob_sing(energy, plot=True):
     if plot:
         fig = plt.figure()
@@ -73,10 +144,10 @@ def neutrino_prob_sing(energy, plot=True):
 
         props = dict(boxstyle='round', facecolor='white', alpha=1,
                     edgecolor=p[0].get_color())
-        text = r"$\theta_{23}$ = $\pi/4$" + "\n" + \
+        text = r"$\theta_{23}$ = $\pi/4$" + r" $[rad]$" + "\n" + \
                r"$\Delta m^2_{23}$" + \
-               r"= 2.4" + r" $10^{-3} eV^2$"
-        plt.annotate (text, (0.65, 0.09), xycoords="axes fraction", size=12, bbox=props)
+               r"= 2.4" + r" $[10^{-3} \/ \/ eV^2]$"
+        plt.annotate(text, (0.625, 0.09), xycoords="axes fraction", size=12, bbox=props)
 
         plt.xlabel("Energy [GeV]")
         plt.ylabel(r"Survival Probability $\nu_\mu\rightarrow\nu_\mu$")
@@ -175,6 +246,43 @@ def nll_1d_dm2(
     plt.xlabel('dm2')
     plt.legend()
     plt.show()
+
+
+def nll_1d_alpha(
+        min_func,
+        alpha_min, alpha_max,
+        num,
+        theta=np.pi/4, dm2=2.4e-3,
+        plot=True
+        ):
+    
+    if plot:
+        # generate data to plot
+        alpha_list = np.linspace(alpha_min, alpha_max, num)  # list of theta values
+
+        nll_list = []
+        for alpha in alpha_list:  # calculate NLL for each dm2
+            nll = min_func.cal_nll([theta, dm2, alpha])
+            nll_list += [nll]
+
+        nll_list = np.array(nll_list)
+
+        # plot alpha against nll with fixed theta
+        fig = plt.figure()
+        p = plt.plot(alpha_list, nll_list)
+
+        props = dict(boxstyle='round', facecolor='white', alpha=1,
+                    edgecolor=p[0].get_color())
+        text = r"$\theta_{23}$ = $\pi/4$" + r" $[rad]$" + "\n" + \
+               r"$\Delta m^2_{23}$" + \
+               r"= 2.4" + r" $[10^{-3} \/ \/ eV^2]$"
+        plt.annotate(text, (0.6, 0.09), xycoords="axes fraction", size=12, bbox=props)
+
+        plt.ylabel('Negative Log Likelihood')
+        plt.xlabel(r'$\alpha$' + r" $[a. u.]$")
+
+        plt.grid(lw=0.4)
+        plt.show()
 
 
 def change_nll(err_list, label, stop=1e-10):

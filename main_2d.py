@@ -3,7 +3,6 @@ Main file for running code
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 import function as fc
 import load_data as ld
@@ -82,6 +81,21 @@ if plot:
             dm2_min, dm2_max,
             num,
             theta_min
+            )
+
+
+# plot NLL against alpha
+if True:
+    num = 500  # total number per dimension
+    alpha_min = 1e-3
+    alpha_max = 20
+
+    pl_func.nll_1d_alpha(
+            min_func,
+            alpha_min, alpha_max,
+            num,
+            theta=np.pi/4, dm2=2.4e-3,
+            plot=True
             )
 
 
@@ -211,7 +225,7 @@ print('\nUncertainties from Hessian')
 un.std_2(min_func, theta_min, dm2_min)
 
 # plot
-if True:
+if plot:
     pl_func.visual_one_method(
             min_func,
             N,
@@ -247,6 +261,7 @@ params, nll_min, err_list, params_list = min_func.Newtons(
     )
 
 theta_min, dm2_min = params[0], params[1]
+theta_new, dm2_new = theta_min, dm2_min  # save values for plotting later
 theta_plot, dm2_plot = params_list[0], params_list[1]
 
 # estimate error
@@ -536,3 +551,9 @@ dm2_min, _ = pl_func.fit_MC(var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$
 # estimate error
 print('\nUncertainties from Hessian')
 un.std_2(min_func, theta_min, dm2_min)
+
+
+'''
+Plot to compare with the observed data
+'''
+pl_func.data_aligned_2D(theta_new, dm2_new, plot=True)
