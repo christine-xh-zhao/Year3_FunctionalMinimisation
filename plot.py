@@ -5,6 +5,7 @@ Plot functions
 import io
 import numpy as np
 from PIL import Image
+from scipy import stats
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
@@ -118,6 +119,15 @@ def data_aligned_2D(theta, dm2, dir_folder, plot=True):
 
         plt.show()
 
+        # Goodness of fit test
+        doff = len(data_osc) - 2  # degree of freedom
+        chi2 = fc.chi2(data_osc, data_unosc_prob, doff)  # chi squared value
+        p = 1 - stats.chi2.cdf(chi2, doff)  # p value
+        print('\nGoodness of fit test:')
+        print(f'chi2 = {chi2} with {doff} doff and p = {p}')
+        print(f'reduced chi2 = {chi2 / doff}')
+        print(f'p < 0.05: {p < 0.05}')
+
 
 def data_aligned_3D(theta, dm2, alpha, dir_folder, plot=True):
 
@@ -161,6 +171,15 @@ def data_aligned_3D(theta, dm2, alpha, dir_folder, plot=True):
         png1.close()
 
         plt.show()
+
+        # Goodness of fit test
+        doff = len(data_osc) - 2  # degree of freedom
+        chi2 = fc.chi2(data_osc, data_unosc_prob, doff)  # chi squared value
+        p = 1 - stats.chi2.cdf(chi2, doff)  # p value
+        print('\nGoodness of fit test:')
+        print(f'chi2 = {chi2} with {doff} doff and p = {p}')
+        print(f'reduced chi2 = {chi2 / doff}')
+        print(f'p < 0.05: {p < 0.05}')
 
 
 def neutrino_prob_sing(energy, dir_folder, plot=True):
@@ -447,15 +466,7 @@ def visual_one_method(
     plt.show()
 
 
-def Gaussian(x, A, B, C): 
-    return A * np.exp(-(x-B)**2 / (2 * (C**2)))
-
-
-def Lorentzian(x, amp, mean, width):
-    return amp * width**2 / (width**2 + (x - mean)**2)
-
-
-def fit_MC(var_list, var, N, dir_folder=None, var_string='', std_ratio=0.005, Lorentz=False, plot=False):
+def fit_MC(var_list, var, N, dir_folder=None, var_string='', std_ratio=0.005, Lorentz=False, FSA=False, plot=False):
 
     # parameters for histogram
     number, edges = np.histogram(var_list, bins=100)
@@ -467,16 +478,15 @@ def fit_MC(var_list, var, N, dir_folder=None, var_string='', std_ratio=0.005, Lo
     ind_max = np.argmax(num)
     centre_guess = bincenters[ind_max]
     std_guess = centre_guess * std_ratio
-    if Lorentz:
+    x_fit = np.linspace(edges[0], edges[-1], 1000)  # generate data to plot
+    if Lorentz and FSA:
         print('Lorentzian fit')
-        fit, cov = curve_fit(Lorentzian, bincenters, num, [max(num), centre_guess, std_guess])
+        fit, cov = curve_fit(fc.Lorentzian, bincenters, num, [max(num), centre_guess, std_guess])
+        y_fit = fc.Lorentzian(x_fit, *fit)  # generate data to plot
     else:
         print('Gaussian fit')
-        fit, cov = curve_fit(Gaussian, bincenters, num, [max(num), centre_guess, std_guess])
-
-    # generate data to plot Gaussian
-    x_fit = np.linspace(edges[0], edges[-1], 1000)
-    y_fit = Gaussian(x_fit, *fit)
+        fit, cov = curve_fit(fc.Gaussian, bincenters, num, [max(num), centre_guess, std_guess])
+        y_fit = fc.Gaussian(x_fit, *fit)  # generate data to plot
 
     # print fit results
     centre = fit[1]
@@ -488,9 +498,12 @@ def fit_MC(var_list, var, N, dir_folder=None, var_string='', std_ratio=0.005, Lo
     if plot:
         plt.figure(1, figsize=(4,3))
 
-        if Lorentz:
+        if Lorentz and FSA:
             label1 = 'FSA'
             label2 = 'Lorentzian fit'
+        elif FSA:
+            label1 = 'FSA'
+            label2 = 'Gaussian fit'
         else:
             label1 = 'CSA'
             label2 = 'Gaussian fit'

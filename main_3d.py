@@ -58,19 +58,12 @@ print('--- 3D Monte-Carlo method ---')
 N_MC = 10
 print(f'\n-- Run FSA {N_MC} times and estimate from distribution --')
 
-# inital guess same as before
+# inital guess
 theta_guess = 0.65
 dm2_guess = 2.35e-3
 alpha_guess = 1
 T0 = 25
 step = 5e-4
-
-# initial guess to show it can find the global maxima
-# theta_guess = 0.75
-# dm2_guess = 2.6e-3
-# alpha_guess = 1
-# T0 = 80
-# step = 2.5e-4
 
 # loop
 theta_entry = []
@@ -92,22 +85,22 @@ for i in range(N_MC):
     dm2_entry += dm2_plot.tolist()
     alpha_entry += alpha_plot.tolist()
 
-# fit distribution with Lorentzian
+# fit distribution
 plot_mul = plot
 print('\ntheta_min')
 theta_min, _ = pl_func.fit_MC(
     var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
-    N=N_MC, Lorentz=True, plot=plot_mul
+    N=N_MC, FSA=True, plot=plot_mul
     )
 print('\ndm2_min')
 dm2_min, _ = pl_func.fit_MC(
     var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$",
-    N=N_MC, Lorentz=True, plot=plot_mul
+    N=N_MC, FSA=True, plot=plot_mul
     )
 print('\nalpha_min')
 alpha_min, _ = pl_func.fit_MC(
-    var_list=alpha_entry, var=r"$\alpha$ $[a. u.]$",
-    N=N_MC, Lorentz=True, plot=plot_mul
+    var_list=alpha_entry, var=r"$\alpha$ $[GeV^{-1}]$",
+    N=N_MC, FSA=True, plot=plot_mul
     )
 
 
@@ -121,20 +114,12 @@ N_MC = 10
 print(f'\n-- Run CSA {N_MC} times and estimate from distribution --')
 
 # inital guess same as before
-theta_guess = 0.65
-dm2_guess = 2.35e-3
-alpha_guess = 1
+theta_guess = 0.7
+dm2_guess = 2.5e-3
+alpha_guess = 1.2
 T0 = 25
 step = 1e-3
 rho = 0.8
-
-# initial guess to show it can find the global maxima
-# theta_guess = 0.75
-# dm2_guess = 2.6e-3
-# alpha_guess = 1
-# T0 = 80
-# step = 1e-2
-# rho = 0.9
 
 # loop
 theta_entry = []
@@ -170,7 +155,7 @@ dm2_min, _ = pl_func.fit_MC(
     )
 print('\nalpha_min')
 alpha_min, _ = pl_func.fit_MC(
-    var_list=alpha_entry, var=r"$\alpha$ $[a. u.]$",
+    var_list=alpha_entry, var=r"$\alpha$ $[GeV^{-1}]$",
     N=N_MC, plot=plot_mul
     )
 

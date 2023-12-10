@@ -570,17 +570,17 @@ for i in range(N_MC):
     theta_entry += theta_plot.tolist()
     dm2_entry += dm2_plot.tolist()
 
-# fit distribution with Lorentzian
+# fit distribution
 plot_mul = True
 print('\ntheta_min')
 theta_min, _ = pl_func.fit_MC(
     var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
-    N=N_MC, dir_folder=dir_folder, var_string='theta', Lorentz=True, plot=plot_mul
+    N=N_MC, dir_folder=dir_folder, var_string='theta', FSA=True, plot=plot_mul
     )
 print('\ndm2_min')
 dm2_min, _ = pl_func.fit_MC(
     var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$",
-    N=N_MC, dir_folder=dir_folder, var_string='dm2', Lorentz=True, plot=plot_mul
+    N=N_MC, dir_folder=dir_folder, var_string='dm2', FSA=True, plot=plot_mul
     )
 
 # estimate error
