@@ -132,12 +132,15 @@ class Minimiser():
 
         return xmin, ymin, err_list
 
-    def univariate(self, params, guess_step, num_max=100, stop_cond=1e-10):
+    def univariate(self, params, guess_step, function=None, num_max=100, stop_cond=1e-10):
         """
         Univariate method
         """
 
         dimension = len(params)
+
+        if function == None:
+            function = self.cal_nll
 
         if dimension == 2:
             theta_guess, dm2_guess = params[0], params[1]
@@ -151,8 +154,8 @@ class Minimiser():
 
             x_iter = [x0, x1, x2]
             y_iter = [y0, y1, y2]
-            nll_x = [self.cal_nll([x, dm2_guess]) for x in x_iter]  
-            nll_y = [self.cal_nll([theta_guess, y]) for y in y_iter]  
+            nll_x = [function([x, dm2_guess]) for x in x_iter]  
+            nll_y = [function([theta_guess, y]) for y in y_iter]  
 
             # list for storing values for plotting
             xmin = theta_guess
@@ -172,9 +175,9 @@ class Minimiser():
             nll_old = 0
             while True:
                 # estimate another theta
-                nll_x = [self.cal_nll([x, ymin]) for x in x_iter]
+                nll_x = [function([x, ymin]) for x in x_iter]
                 x3 = self.cal_x3(x_iter, nll_x)
-                nll = self.cal_nll([x3, ymin])
+                nll = function([x3, ymin])
 
                 x_iter.append(x3)
                 nll_x.append(nll)
@@ -214,9 +217,9 @@ class Minimiser():
 
 
                 # estimate another dm2
-                nll_y = [self.cal_nll([xmin, y]) for y in y_iter]
+                nll_y = [function([xmin, y]) for y in y_iter]
                 y3 = self.cal_x3(y_iter, nll_y)
-                nll = self.cal_nll([xmin, y3])
+                nll = function([xmin, y3])
 
                 y_iter.append(y3)
                 nll_y.append(nll)
@@ -271,9 +274,9 @@ class Minimiser():
             x_iter = [x0, x1, x2]
             y_iter = [y0, y1, y2]
             z_iter = [z0, z1, z2]
-            nll_x = [self.cal_nll([x, dm2_guess, alpha_guess]) for x in x_iter]  
-            nll_y = [self.cal_nll([theta_guess, y, alpha_guess]) for y in y_iter]  
-            nll_z = [self.cal_nll([theta_guess, dm2_guess, z]) for z in z_iter]  
+            nll_x = [function([x, dm2_guess, alpha_guess]) for x in x_iter]  
+            nll_y = [function([theta_guess, y, alpha_guess]) for y in y_iter]  
+            nll_z = [function([theta_guess, dm2_guess, z]) for z in z_iter]  
 
             # list for storing values for plotting
             xmin = theta_guess
@@ -292,9 +295,9 @@ class Minimiser():
             nll_old = 0
             while True:
                 # estimate another theta
-                nll_x = [self.cal_nll([x, ymin, zmin]) for x in x_iter]
+                nll_x = [function([x, ymin, zmin]) for x in x_iter]
                 x3 = self.cal_x3(x_iter, nll_x)
-                nll = self.cal_nll([x3, ymin, zmin])
+                nll = function([x3, ymin, zmin])
 
                 x_iter.append(x3)
                 nll_x.append(nll)
@@ -333,9 +336,9 @@ class Minimiser():
 
 
                 # estimate another dm2
-                nll_y = [self.cal_nll([xmin, y, zmin]) for y in y_iter]
+                nll_y = [function([xmin, y, zmin]) for y in y_iter]
                 y3 = self.cal_x3(y_iter, nll_y)
-                nll = self.cal_nll([xmin, y3, zmin])
+                nll = function([xmin, y3, zmin])
 
                 y_iter.append(y3)
                 nll_y.append(nll)
@@ -374,9 +377,9 @@ class Minimiser():
 
 
                 # estimate another alpha
-                nll_z = [self.cal_nll([xmin, ymin, z]) for z in z_iter]
+                nll_z = [function([xmin, ymin, z]) for z in z_iter]
                 z3 = self.cal_x3(z_iter, nll_z)
-                nll = self.cal_nll([xmin, ymin, z3])
+                nll = function([xmin, ymin, z3])
 
                 z_iter.append(z3)
                 nll_z.append(nll)
@@ -415,14 +418,18 @@ class Minimiser():
 
             return xmin, ymin, zmin, nll_min, err_list, x_min, y_min, z_min
 
-    def Newtons(self, params, num_max=100, stop_cond=1e-10):
+    def Newtons(self, params, function=None, num_max=100, stop_cond=1e-10):
         """
         Newton's method
         """
 
         # initalise
         params = np.array(params)
-        nll = self.cal_nll(params)
+
+        if function == None:
+            function = self.cal_nll
+
+        nll = function(params)
 
         params_list = []
         params_list.append(params)
@@ -433,10 +440,10 @@ class Minimiser():
         num = 1
         while True:
             # grad of function
-            grad = un.gradient(f=self.cal_nll, x=params)
+            grad = un.gradient(f=function, x=params)
 
             # inverse hessian
-            hes = un.hessian(func=self.cal_nll, x=params)
+            hes = un.hessian(func=function, x=params)
 
             det_hes = np.linalg.det(hes)  # ensure Hessian is positive definite
             if det_hes <= 0:
@@ -446,7 +453,7 @@ class Minimiser():
 
             # update parameters and nll
             params_new = params - np.dot(hes_inv, grad)
-            nll_new = self.cal_nll(params_new)
+            nll_new = function(params_new)
 
             params_list.append(params_new)
 
@@ -475,18 +482,22 @@ class Minimiser():
 
         return params_new, nll_new, err_list, np.array(params_list).T
 
-    def quasi_Newton(self, params, alpha, num_max=100, stop_cond=1e-10):
+    def quasi_Newton(self, params, alpha, function=None, num_max=100, stop_cond=1e-10):
         """
         Quasi-Newton method
         """
 
         # initalise
         params = np.array(params)
-        nll = self.cal_nll(params)
+
+        if function == None:
+            function = self.cal_nll
+
+        nll = function(params)
 
         N = len(params)
         G = np.identity(N)
-        grad = un.gradient(f=self.cal_nll, x=params) * alpha
+        grad = un.gradient(f=function, x=params) * alpha
 
         params_list = []
         params_list.append(params)
@@ -501,7 +512,7 @@ class Minimiser():
 
             # update parameters and nll
             params_new = params - np.dot(hes_inv, grad)
-            nll_new = self.cal_nll(params_new)
+            nll_new = function(params_new)
 
             params_list.append(params_new)
 
@@ -525,7 +536,7 @@ class Minimiser():
                 break
 
             # update G
-            grad_new = un.gradient(f=self.cal_nll, x=params_new)
+            grad_new = un.gradient(f=function, x=params_new)
 
             gamma = grad_new - grad
             delta = params_new - params
@@ -546,7 +557,7 @@ class Minimiser():
 
         return params_new, nll_new, err_list, np.array(params_list).T
 
-    def gradient_descent(self, params, alpha, num_max=100, stop_cond=1e-10):
+    def gradient_descent(self, params, alpha, function=None, num_max=100, stop_cond=1e-10):
         """
         Gradient descent
         """
@@ -555,7 +566,10 @@ class Minimiser():
         params = np.array(params)
         dimension = params.shape[0]
 
-        nll = self.cal_nll(params)
+        if function == None:
+            function = self.cal_nll
+
+        nll = function(params)
 
         params_list = []
         params_list.append(params)
@@ -566,17 +580,20 @@ class Minimiser():
         num = 1
         while True:
             # gradient of function
-            grad = un.gradient(f=self.cal_nll, x=params)
+            grad = un.gradient(f=function, x=params)
 
             # scale the alpha of dm2 gradient to similar magnitude as theta gradient
-            if dimension == 2:
-                alpha_mat = [[alpha, 0], [0, alpha*1e-5]]
-            elif dimension == 3:
-                alpha_mat = [[alpha, 0, 0], [0, alpha*5e-7, 0], [0, 0, alpha]]
+            if function == None:
+                if dimension == 2:
+                    alpha_mat = [[alpha, 0], [0, alpha*1e-5]]
+                elif dimension == 3:
+                    alpha_mat = [[alpha, 0, 0], [0, alpha*5e-7, 0], [0, 0, alpha]]
+            else:
+                alpha_mat = [[alpha, 0], [0, alpha]]
 
             # update parameters and nll
             params_new = params - np.dot(alpha_mat, grad)
-            nll_new = self.cal_nll(params_new)
+            nll_new = function(params_new)
 
             params_list.append(params_new)
 
@@ -626,6 +643,7 @@ class Minimiser():
 
         if function == None:
             function = self.cal_nll
+
         nll = function(params)
         T = T0
 

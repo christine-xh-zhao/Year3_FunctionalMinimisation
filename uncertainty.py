@@ -151,7 +151,7 @@ def std_2(min_func, theta_min, dm2_min):
     Calculate standard deviation for minimised theta and dm2
     """
     
-    hes = hessian(func=min_func.cal_nll, x=np.array([theta_min, dm2_min]))
+    hes = hessian(func=min_func, x=np.array([theta_min, dm2_min]))
 
     hes_inv = np.linalg.inv(hes)  # inverse hessian to get covariance
     sig_theta = np.sqrt(2) * np.sqrt(hes_inv[0][0])  # std is sqrt of covariance diagonal

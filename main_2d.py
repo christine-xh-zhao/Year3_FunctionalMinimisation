@@ -107,7 +107,7 @@ dm2_guess = 2.25e-3
 
 # estimate error
 print('\nUncertainties from Hessian')
-un.std_2(min_func, theta_min, dm2_min)
+un.std_2(min_func.cal_nll, theta_min, dm2_min)
 
 # plot
 if plot:
@@ -159,7 +159,7 @@ theta_plot, dm2_plot = params_list[0], params_list[1]
 
 # estimate error
 print('\nUncertainties from Hessian')
-un.std_2(min_func, theta_min, dm2_min)
+un.std_2(min_func.cal_nll, theta_min, dm2_min)
 
 # plot
 if plot:
@@ -209,7 +209,7 @@ theta_plot, dm2_plot = params_list[0], params_list[1]
 
 # estimate error
 print('\nUncertainties from Hessian')
-un.std_2(min_func, theta_min, dm2_min)
+un.std_2(min_func.cal_nll, theta_min, dm2_min)
 
 # plot
 if plot:
@@ -259,7 +259,7 @@ theta_plot, dm2_plot = params_list[0], params_list[1]
 
 # estimate error
 print('\nUncertainties from Hessian')
-un.std_2(min_func, theta_min, dm2_min)
+un.std_2(min_func.cal_nll, theta_min, dm2_min)
 
 # plot
 if plot:
@@ -381,7 +381,7 @@ if run_once:
 
     # estimate error
     print('\nUncertainties from Hessian')
-    un.std_2(min_func, theta_min, dm2_min)
+    un.std_2(min_func.cal_nll, theta_min, dm2_min)
 
     # plot
     if plot:
@@ -440,7 +440,7 @@ if run_once:
 
     # estimate error
     print('\nUncertainties from Hessian')
-    un.std_2(min_func, theta_min, dm2_min)
+    un.std_2(min_func.cal_nll, theta_min, dm2_min)
 
     # plot
     if plot:
@@ -532,7 +532,7 @@ dm2_min, _ = pl_func.fit_MC(
 
 # estimate error
 print('\nUncertainties from Hessian')
-un.std_2(min_func, theta_min, dm2_min)
+un.std_2(min_func.cal_nll, theta_min, dm2_min)
 
 
 # run MC N times and estimate minima by fitting Gaussian to the distribution
@@ -585,7 +585,7 @@ dm2_min, _ = pl_func.fit_MC(
 
 # estimate error
 print('\nUncertainties from Hessian')
-un.std_2(min_func, theta_min, dm2_min)
+un.std_2(min_func.cal_nll, theta_min, dm2_min)
 
 
 '''
