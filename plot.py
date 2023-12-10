@@ -145,7 +145,7 @@ def data_aligned_3D(theta, dm2, alpha, dir_folder, plot=True):
         ax.bar(10, 10, color='w',
                label=r"$\theta_{23}$ = " + f'{theta:.3f}' + r" $[rad]$" + "\n" + \
                 r"$\Delta m^2_{23}$ = " + f'{dm2*1e3:.3f}' + r" $[10^{-3} \/ \/ eV^2]$" + "\n" + \
-                r"$\alpha$ = " + f'{alpha:.3f}' + r" $[a. u.]$")
+                r"$\alpha$ = " + f'{alpha:.3f}' + r" $[GeV^{-1}]$")
 
         ax.set_xlabel("Energy [GeV]")
         ax.set_ylabel(r"# of $\nu_\mu$ entries")
@@ -318,7 +318,7 @@ def nll_1d_alpha(
         plt.annotate(text, (0.6, 0.09), xycoords="axes fraction", size=12, bbox=props)
 
         plt.ylabel('Negative Log Likelihood')
-        plt.xlabel(r'$\alpha$' + r" $[a. u.]$")
+        plt.xlabel(r'$\alpha$' + r" $[GeV^{-1}]$")
 
         plt.grid(lw=0.4)
 

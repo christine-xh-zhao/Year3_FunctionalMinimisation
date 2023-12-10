@@ -66,7 +66,7 @@ if plot:
 
 # plot a big 2D diagram
 if True:
-    N = 1000  # total number per dimension
+    N = 100  # total number per dimension, use 1000 to regenerate the plot in report
     theta_list = np.linspace(0, np.pi/2, N)
     dm2_list = np.linspace(0, 40e-3, N)
 
