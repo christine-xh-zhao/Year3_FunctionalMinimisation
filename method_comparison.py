@@ -196,12 +196,13 @@ print('--- Gradient descent ---\n')
 # gradient descent
 theta_guess = -0.25
 dm2_guess = 0.25
+stop_cond=1e-10
 
 params, nll_min, err_list, params_list = min_func.gradient_descent(
     [theta_guess, dm2_guess],
-    alpha=1e-1,
+    alpha=6e-2,
     function=function,
-    num_max=100, stop_cond=1e-10
+    num_max=100, stop_cond=stop_cond
     )
 
 theta_min, dm2_min = params[0], params[1]
@@ -222,3 +223,4 @@ if True:
             label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$",
             stop=stop_cond
             )
+        
