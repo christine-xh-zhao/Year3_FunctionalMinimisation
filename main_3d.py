@@ -117,8 +117,8 @@ print(f'\n-- Run CSA {N_MC} times and estimate from distribution --')
 theta_guess = 0.7
 dm2_guess = 2.5e-3
 alpha_guess = 1.2
-T0 = 25
-step = 1e-3
+T0 = 750
+step = 1.25e-1
 rho = 0.8
 
 # loop
@@ -130,7 +130,7 @@ for i in range(N_MC):
     _, _, _, params_list = min_func.Monte_Carlo(
         [theta_guess, dm2_guess, alpha_guess],
         T0, step, rho,
-        num_max=4000,
+        num_max=15000,
         method='CSA',
         printout=False
         )
@@ -142,7 +142,7 @@ for i in range(N_MC):
     alpha_entry += alpha_plot.tolist()
 
 # fit distribution with Gaussian
-plot_mul = plot
+plot_mul = True
 print('\ntheta_min')
 theta_min, _ = pl_func.fit_MC(
     var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
