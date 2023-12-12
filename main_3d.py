@@ -306,4 +306,5 @@ if plot:
 '''
 Plot to compare with the observed data
 '''
-pl_func.data_aligned_3D(theta_new, dm2_new, alpha_new, dir_folder, plot=True)
+if True:
+    pl_func.data_aligned_3D(theta_new, dm2_new, alpha_new, dir_folder, plot=True)

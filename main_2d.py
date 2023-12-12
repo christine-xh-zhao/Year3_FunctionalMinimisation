@@ -518,7 +518,7 @@ for i in range(N_MC):
     dm2_entry += dm2_plot.tolist()
 
 # fit distribution with Gaussian
-plot_mul = True
+plot_mul = plot_all
 print('\ntheta_min')
 theta_min, _ = pl_func.fit_MC(
     var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
@@ -571,7 +571,7 @@ for i in range(N_MC):
     dm2_entry += dm2_plot.tolist()
 
 # fit distribution
-plot_mul = True
+plot_mul = plot_all
 print('\ntheta_min')
 theta_min, _ = pl_func.fit_MC(
     var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
@@ -591,4 +591,5 @@ un.std_2(min_func.cal_nll, theta_min, dm2_min)
 '''
 Plot to compare with the observed data
 '''
-pl_func.data_aligned_2D(theta_new, dm2_new, dir_folder, plot=True)
+if plot_all:
+    pl_func.data_aligned_2D(theta_new, dm2_new, dir_folder, plot=True)

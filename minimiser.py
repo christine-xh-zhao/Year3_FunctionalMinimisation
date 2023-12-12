@@ -568,7 +568,14 @@ class Minimiser():
 
         if function == None:
             function = self.cal_nll
-
+            # scale the alpha of dm2 gradient to similar magnitude as theta gradient
+            if dimension == 2:
+                alpha_mat = [[alpha, 0], [0, alpha*1e-5]]
+            elif dimension == 3:
+                alpha_mat = [[alpha, 0, 0], [0, alpha*5e-7, 0], [0, 0, alpha]]
+        else:
+            alpha_mat = [[alpha, 0], [0, alpha]]
+            
         nll = function(params)
 
         params_list = []
@@ -581,15 +588,6 @@ class Minimiser():
         while True:
             # gradient of function
             grad = un.gradient(f=function, x=params)
-
-            # scale the alpha of dm2 gradient to similar magnitude as theta gradient
-            if function == None:
-                if dimension == 2:
-                    alpha_mat = [[alpha, 0], [0, alpha*1e-5]]
-                elif dimension == 3:
-                    alpha_mat = [[alpha, 0, 0], [0, alpha*5e-7, 0], [0, 0, alpha]]
-            else:
-                alpha_mat = [[alpha, 0], [0, alpha]]
 
             # update parameters and nll
             params_new = params - np.dot(alpha_mat, grad)
