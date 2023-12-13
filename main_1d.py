@@ -53,19 +53,27 @@ if plot:
         width
         )
 
-# NLL against theta
+
 min_func = mi.Minimiser()
 
-if plot:
-    num = 100  # number of values to generate
+# NLL against theta
+if True:
+    num = 500  # number of values to generate
     theta_max = np.pi/2  # full range, whould have two minima
     theta_min = 0
 
-    pl_func.nll_1d_theta(min_func, theta_min, theta_max, num, dm2=2.4)
+    pl_func.nll_1d_theta(
+        min_func,
+        theta_min, theta_max,
+        num,
+        dir_folder,
+        dm2=2.4,
+        plot=True
+        )
 
 
 # plot a big 2D diagram
-if True:
+if plot:
     N = 100  # total number per dimension, use 1000 to regenerate the plot in report
     theta_list = np.linspace(0, np.pi/2, N)
     dm2_list = np.linspace(0, 40e-3, N)
@@ -100,7 +108,7 @@ if plot:
 
 
 # plot NLL against alpha
-if True:
+if plot:
     num = 500  # total number per dimension
     alpha_min = 1e-3
     alpha_max = 20

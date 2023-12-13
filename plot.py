@@ -19,20 +19,20 @@ def data(energy, data_osc, data_unosc, width):
     # plot energy against raw data, oscillated and unoscillated
     fig = plt.figure()
     plt.bar(energy, data_osc, width, label='oscillated')
-    plt.ylabel('# of entries')
+    plt.ylabel('Number of entries')
     plt.xlabel('energy (GeV)')
     plt.legend()
 
     fig = plt.figure()
     plt.bar(energy, data_unosc, width, label='unoscillated', color='C1')
-    plt.ylabel('# of entries')
+    plt.ylabel('Number of entries')
     plt.xlabel('energy (GeV)')
     plt.legend()
 
     fig = plt.figure()
     plt.bar(energy, data_unosc, width, label='unoscillated', color='C1')
     plt.bar(energy, data_osc, width, label='oscillated', color='C0')
-    plt.ylabel('# of entries')
+    plt.ylabel('Number of entries')
     plt.xlabel('energy (GeV)')
     plt.legend()
 
@@ -46,18 +46,18 @@ def data_aligned(energy, data_osc, data_unosc, width, dir_folder, plot=True):
         col_ax = 'C2'
         col_ax2 = 'C4'
 
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(5, 2.5))
         ax2 = ax.twinx()
 
         ax.bar(energy, data_osc, width, align="edge", color=col_ax, alpha=0.9,
-               label="Observed (oscillated)")
-        ax.bar(1, 0, color=col_ax2, label="Simulated (unoscillated)")
+               label="Observed oscillated")
+        ax.bar(1, 0, color=col_ax2, label="Initial unoscillated")
         
         ax2.bar(energy, data_unosc, width, align="edge", color=col_ax2, alpha=0.75)
 
         ax.set_xlabel("Energy [GeV]")
-        ax.set_ylabel(r"# of entries (oscillated $\nu_\mu$)", color=col_ax)
-        ax2.set_ylabel(r"# of entries (non-oscillated)", color=col_ax2)
+        ax.set_ylabel(r"Number of entries", color=col_ax)
+        ax2.set_ylabel(r"Number of entries", color=col_ax2)
 
         ax.tick_params(axis="y", colors=col_ax)
         ax2.tick_params(axis="y", colors=col_ax2)
@@ -71,7 +71,7 @@ def data_aligned(energy, data_osc, data_unosc, width, dir_folder, plot=True):
         plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
                     bbox_inches='tight')
         png2 = Image.open(png1)
-        png2.save(dir_folder + f"/data_aligned_1D.tiff")
+        png2.save(dir_folder + f"/data_aligned_1D.png")
         png1.close()
 
         plt.show()
@@ -89,7 +89,7 @@ def data_aligned_2D(theta, dm2, dir_folder, plot=True):
         col_ax = 'C2'
         col_ax2 = 'C4'
 
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(5, 2.5))
 
         ax.bar(energy, data_osc, width, align="edge", color=col_ax, alpha=0.9,
                label="Observed")
@@ -105,7 +105,7 @@ def data_aligned_2D(theta, dm2, dir_folder, plot=True):
                 r"$\Delta m^2_{23}$ = " + f'{dm2*1e3:.3f}' + r" $[10^{-3} \/ \/ eV^2]$")
 
         ax.set_xlabel("Energy [GeV]")
-        ax.set_ylabel(r"# of $\nu_\mu$ entries")
+        ax.set_ylabel(r"Number of $\nu_\mu$ entries")
 
         ax.legend()
         ax.grid(lw=0.4)
@@ -114,7 +114,7 @@ def data_aligned_2D(theta, dm2, dir_folder, plot=True):
         plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
                     bbox_inches='tight')
         png2 = Image.open(png1)
-        png2.save(dir_folder + f"/data_aligned_2D.tiff")
+        png2.save(dir_folder + f"/data_aligned_2D.png")
         png1.close()
 
         plt.show()
@@ -141,7 +141,7 @@ def data_aligned_3D(theta, dm2, alpha, dir_folder, plot=True):
         col_ax = 'C2'
         col_ax2 = 'C4'
 
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(5, 2.5))
 
         ax.bar(energy, data_osc, width, align="edge", color=col_ax, alpha=0.9,
                label="Observed")
@@ -158,7 +158,7 @@ def data_aligned_3D(theta, dm2, alpha, dir_folder, plot=True):
                 r"$\alpha$ = " + f'{alpha:.3f}' + r" $[GeV^{-1}]$")
 
         ax.set_xlabel("Energy [GeV]")
-        ax.set_ylabel(r"# of $\nu_\mu$ entries")
+        ax.set_ylabel(r"Number of $\nu_\mu$ entries")
 
         ax.legend()
         ax.grid(lw=0.4)
@@ -167,7 +167,7 @@ def data_aligned_3D(theta, dm2, alpha, dir_folder, plot=True):
         plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
                     bbox_inches='tight')
         png2 = Image.open(png1)
-        png2.save(dir_folder + f"/data_aligned_3D.tiff")
+        png2.save(dir_folder + f"/data_aligned_3D.png")
         png1.close()
 
         plt.show()
@@ -186,7 +186,7 @@ def neutrino_prob_sing(energy, dir_folder, plot=True):
 
     # plot neutrino probability against energy
     if plot:
-        fig = plt.figure()
+        fig = plt.figure(figsize=(5, 2))
         p = plt.plot(energy, fc.neutrino_prob(E=energy))
 
         props = dict(boxstyle='round', facecolor='white', alpha=1,
@@ -194,7 +194,7 @@ def neutrino_prob_sing(energy, dir_folder, plot=True):
         text = r"$\theta_{23}$ = $\pi/4$" + r" $[rad]$" + "\n" + \
                r"$\Delta m^2_{23}$" + \
                r"= 2.4" + r" $[10^{-3} \/ \/ eV^2]$"
-        plt.annotate(text, (0.6, 0.09), xycoords="axes fraction", size=12, bbox=props)
+        plt.annotate(text, (0.5, 0.09), xycoords="axes fraction", size=12, bbox=props)
 
         plt.xlabel("Energy [GeV]")
         plt.ylabel(r"Survival Probability $\nu_\mu\rightarrow\nu_\mu$")
@@ -205,7 +205,7 @@ def neutrino_prob_sing(energy, dir_folder, plot=True):
         plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
                     bbox_inches='tight')
         png2 = Image.open(png1)
-        png2.save(dir_folder + f"/neutrino_probability.tiff")
+        png2.save(dir_folder + f"/neutrino_probability.png")
         png1.close()
 
         plt.show()
@@ -230,7 +230,7 @@ def data_with_prob(energy, data_unosc_prob, data_unosc, data_osc, width):
     # plot number of entries for oscillated, unoscillated, and unoscillated x neutrino_prob against energy
     fig = plt.figure()
     plt.bar(energy, data_unosc_prob, width, color='C2', label='unoscillated x prob\n(default params)')
-    plt.ylabel('# of entries')
+    plt.ylabel('Number of entries')
     plt.xlabel('energy (GeV)')
     plt.legend()
     plt.show()
@@ -239,7 +239,7 @@ def data_with_prob(energy, data_unosc_prob, data_unosc, data_osc, width):
     plt.bar(energy, data_unosc, width, color='C1', label='unoscillated')
     plt.bar(energy, data_unosc_prob, width, color='C2', label='unoscillated x prob\n(default params)')
     plt.bar(energy, data_osc, width, color='C4', label='oscillated', alpha=0.7)
-    plt.ylabel('# of entries')
+    plt.ylabel('Number of entries')
     plt.xlabel('energy (GeV)')
     plt.legend()
     plt.show()
@@ -247,7 +247,7 @@ def data_with_prob(energy, data_unosc_prob, data_unosc, data_osc, width):
     fig = plt.figure()
     plt.bar(energy, data_unosc_prob, width, color='C2', label='unoscillated x prob\n(default params)')
     plt.bar(energy, data_osc, width, color='C4', label='oscillated', alpha=0.7)
-    plt.ylabel('# of entries')
+    plt.ylabel('Number of entries')
     plt.xlabel('energy (GeV)')
     plt.legend()
     plt.show()
@@ -257,26 +257,48 @@ def nll_1d_theta(
         min_func,
         theta_min, theta_max,
         num,
-        dm2=2.4
+        dir_folder,
+        dm2=2.4,
+        plot=True
         ):
+    
+    if plot:
+        # generate data to plot
+        theta_list = np.linspace(theta_min, theta_max, num)  # list of theta values
 
-    # generate data to plot
-    theta_list = np.linspace(theta_min, theta_max, num)  # list of theta values
+        nll_list = []
+        for theta in theta_list:  # calculate NLL for each theta
+            nll = min_func.cal_nll(theta)
+            nll_list += [nll]
 
-    nll_list = []
-    for theta in theta_list:  # calculate NLL for each theta
-        nll = min_func.cal_nll(theta)
-        nll_list += [nll]
+        nll_list = np.array(nll_list)
 
-    nll_list = np.array(nll_list)
+        # plot theta against nll with fixted theta
+        fig = plt.figure(figsize=(5, 2.5))
+        p = plt.plot(theta_list, nll_list)
 
-    # plot theta against nll with fixted theta
-    fig = plt.figure()
-    plt.plot(theta_list, nll_list, label=f'dm2 = {dm2} e-3')
-    plt.ylabel('NLL')
-    plt.xlabel('theta')
-    plt.legend()
-    plt.show()
+        props = dict(boxstyle='round', facecolor='white', alpha=1,
+                    edgecolor=p[0].get_color())
+        text = r"$\Delta m^2_{23}$" + \
+               r"= " + str(dm2) + r" $[10^{-3} \/ \/ eV^2]$"
+        plt.annotate(text, (0.275, 0.8), xycoords="axes fraction", size=12, bbox=props)
+
+        plt.ylabel('NLL')
+        plt.xlabel(r"$\theta_{23}$")
+
+        plt.ylim(1275, 1400)
+        plt.xlim(0.62, 0.95)
+
+        plt.grid(lw=0.4)
+
+        png1 = io.BytesIO()
+        plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
+                    bbox_inches='tight')
+        png2 = Image.open(png1)
+        png2.save(dir_folder + f"/nll_vs_theta.png")
+        png1.close()
+
+        plt.show()
     
 
 def nll_1d_dm2(
@@ -345,7 +367,7 @@ def nll_1d_alpha(
         plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
                     bbox_inches='tight')
         png2 = Image.open(png1)
-        png2.save(dir_folder + f"/nll_vs_alpha.tiff")
+        png2.save(dir_folder + f"/nll_vs_alpha.png")
         png1.close()
 
         plt.show()
@@ -406,7 +428,7 @@ def nll_2d_theta_dm2(min_func, N, theta_list, dm2_list, dir_folder):
         plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
                     bbox_inches='tight')
         png2 = Image.open(png1)
-        png2.save(dir_folder + f"/nll_vs_theta-dm2.tiff")
+        png2.save(dir_folder + f"/nll_vs_theta-dm2.png")
         png1.close()
 
         plt.show()
@@ -496,7 +518,7 @@ def fit_MC(var_list, var, N, dir_folder=None, var_string='', std_ratio=0.005, Lo
 
     # plot
     if plot:
-        plt.figure(1, figsize=(4,3))
+        plt.figure(1, figsize=(3, 3))
 
         if Lorentz and FSA:
             label1 = 'FSA'
@@ -525,7 +547,7 @@ def fit_MC(var_list, var, N, dir_folder=None, var_string='', std_ratio=0.005, Lo
             plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
                         bbox_inches='tight')
             png2 = Image.open(png1)
-            png2.save(dir_folder + f"/MC-{label1}-{var_string}.tiff")
+            png2.save(dir_folder + f"/MC-{label1}-{var_string}.png")
             png1.close()
 
         plt.show()

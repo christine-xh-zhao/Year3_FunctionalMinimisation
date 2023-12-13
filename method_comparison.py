@@ -67,7 +67,7 @@ Z = function([X, Y])
 
 
 # plot function
-if plot:
+if True:
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
 
@@ -117,7 +117,7 @@ dm2_guess = 1.5
 T0 = 50
 rho = 0.5
 step = 5e-1
-stop_cond = 1e-7
+stop_cond = 1e-10
 
 if True:
     # Monte-Carlo classical simulated annealing
@@ -131,10 +131,6 @@ if True:
 
     theta_min, dm2_min = params[0], params[1]
     theta_plot, dm2_plot = params_list[0], params_list[1]
-
-    # estimate error
-    print('\nUncertainties from Hessian')
-    un.std_2(function, theta_min, dm2_min)
 
     # plot
     if True:
@@ -153,26 +149,22 @@ print('\n\n- Fast simulated annealing -\n')
 # inital guess
 theta_guess = -1.5
 dm2_guess = 1.5
-T0 = 150
+T0 = 1000
 step = 1e-2
-stop_cond = 1e-7
+stop_cond = 1e-16
 
 if True:
     # Monte-Carlo fast simulated annealing
     params, nll_min, err_list, params_list = min_func.Monte_Carlo(
         [theta_guess, dm2_guess],
         T0, step,
-        num_max=2e4, stop_cond=stop_cond,
+        num_max=5e4, stop_cond=stop_cond,
         function=function,
         method='FSA'
         )
 
     theta_min, dm2_min = params[0], params[1]
     theta_plot, dm2_plot = params_list[0], params_list[1]
-
-    # estimate error
-    print('\nUncertainties from Hessian')
-    un.std_2(function, theta_min, dm2_min)
 
     # plot
     if True:
@@ -196,7 +188,7 @@ print('--- Gradient descent ---\n')
 # gradient descent
 theta_guess = -0.25
 dm2_guess = 0.25
-stop_cond=1e-10
+stop_cond = 1e-10
 
 params, nll_min, err_list, params_list = min_func.gradient_descent(
     [theta_guess, dm2_guess],
@@ -208,9 +200,6 @@ params, nll_min, err_list, params_list = min_func.gradient_descent(
 theta_min, dm2_min = params[0], params[1]
 theta_plot, dm2_plot = params_list[0], params_list[1]
 
-# estimate error
-print('\nUncertainties from Hessian')
-un.std_2(min_func.cal_nll, theta_min, dm2_min)
 
 # plot
 if True:

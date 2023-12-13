@@ -66,7 +66,11 @@ if plot_all:
     nll_list = np.array(nll_list)
 
     # plot colours
-    fig, ax1 = plt.subplots(figsize=(6, 4))
+    # fig, ax1 = plt.subplots(121, figsize=(4, 2.5))
+    fig, axes = plt.subplots(2, 1, figsize=(5, 4.5))
+    ax1 = axes[0]
+    ax2 = axes[1]
+
     cntr1 = ax1.contourf(
         theta_list, dm2_list, nll_list,
         levels=500,
@@ -74,7 +78,9 @@ if plot_all:
         # cmap='GnBu_r'
         )
 
-    ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
+    ax1.annotate ("a)", (-0.15, 1.00), xycoords = "axes fraction")
+
+    # ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
     ax1.set_ylabel(r"$\Delta m_{23}^2$ $[eV^2]$")
 
     # plot contours
@@ -84,7 +90,7 @@ if plot_all:
 
     plt.subplots_adjust(hspace=0.2, top=0.95, bottom=0.1)
 
-    fig.colorbar(cntr1, ax=ax1, label="Negative Log Likelihood")
+    # fig.colorbar(cntr1, ax=ax1, label="Negative Log Likelihood")
 
 
 '''
@@ -288,16 +294,16 @@ if plot_all:
     V = np.subtract(dm2_plot[1:], dm2_plot[:-1])
     ax1.quiver(X, Y, U, V, color="silver", angles='xy', scale_units='xy', scale=1, label='Gradient descent')
 
-    ax1.legend()
+    # ax1.legend()
 
-    png1 = io.BytesIO()
-    plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
-                bbox_inches='tight')
-    png2 = Image.open(png1)
-    png2.save(dir_folder + "/visualise-4-methods.tiff")
-    png1.close()
+    # png1 = io.BytesIO()
+    # plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
+    #             bbox_inches='tight')
+    # png2 = Image.open(png1)
+    # png2.save(dir_folder + "/visualise-4-methods.png")
+    # png1.close()
 
-    plt.show()
+    # plt.show()
 
 
 '''
@@ -330,25 +336,25 @@ if plot_all:
     nll_list = np.array(nll_list)
 
     # plot colours
-    fig, ax1 = plt.subplots(figsize=(6, 4))
-    cntr1 = ax1.contourf(
+    plt.subplots(122, figsize=(4, 2.5))
+    cntr1 = ax2.contourf(
         theta_list, dm2_list, nll_list,
         levels=500,
         cmap='nipy_spectral',
         # cmap='GnBu_r'
         )
 
-    ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
-    ax1.set_ylabel(r"$\Delta m_{23}^2$ $[eV^2]$")
+    ax2.set_xlabel(r"$\theta_{23}$ $[rad]$")
+    ax2.set_ylabel(r"$\Delta m_{23}^2$ $[eV^2]$")
 
     # plot contours
     cntr1.levels = cntr1.levels.tolist()
-    ax1.contour(cntr1, levels=cntr1.levels[1:30:8], colors='w', alpha=0.5)
-    ax1.contour(cntr1, levels=cntr1.levels[40:-1:42], colors='w', alpha=0.5)
+    ax2.contour(cntr1, levels=cntr1.levels[1:30:8], colors='w', alpha=0.5)
+    ax2.contour(cntr1, levels=cntr1.levels[40:-1:42], colors='w', alpha=0.5)
 
     plt.subplots_adjust(hspace=0.2, top=0.95, bottom=0.1)
 
-    fig.colorbar(cntr1, ax=ax1, label="Negative Log Likelihood")
+    fig.colorbar(cntr1, ax=axes, label="Negative Log Likelihood")
 
 
 print('\n- Classical simulated annealing -\n')
@@ -476,7 +482,7 @@ if plot_all:
     plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
                 bbox_inches='tight')
     png2 = Image.open(png1)
-    png2.save(dir_folder + "/visualise-2-MCs.tiff")
+    png2.save(dir_folder + "/visualise-2-MCs.png")
     png1.close()
 
     plt.show()
