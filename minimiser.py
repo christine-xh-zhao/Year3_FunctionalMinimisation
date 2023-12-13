@@ -497,7 +497,7 @@ class Minimiser():
 
         N = len(params)
         G = np.identity(N)
-        grad = un.gradient(f=function, x=params) * alpha
+        grad = un.gradient(f=function, x=params) * alpha  # scale the first step only
 
         params_list = []
         params_list.append(params)
@@ -506,13 +506,27 @@ class Minimiser():
 
         # iterate
         num = 1
+        current = False
         while True:
+            # if iteration is updated
+            if not current:
+                alpha = 1  # reset alpha
+
             # inverse hessian
             hes_inv = 1. * G
 
             # update parameters and nll
-            params_new = params - np.dot(hes_inv, grad)
+            params_new = params - np.dot(hes_inv, grad) * alpha
             nll_new = function(params_new)
+
+            Wolfe = nll_new < nll + 1e-4 * np.dot((params_new - params), grad)
+            if not Wolfe:
+                if not current:
+                    alpha /= 2
+                    current = True
+                    continue
+            else:
+                current = False   
 
             params_list.append(params_new)
 
@@ -585,13 +599,29 @@ class Minimiser():
 
         # iterate
         num = 1
+        current = False
+        alpha_mat0 = 1. * np.array(alpha_mat)
         while True:
+            # if iteration is updated
+            if not current:
+                alpha_mat = alpha_mat0  # reset alpha
+
             # gradient of function
             grad = un.gradient(f=function, x=params)
 
             # update parameters and nll
             params_new = params - np.dot(alpha_mat, grad)
+            # params_new = params - grad * alpha
             nll_new = function(params_new)
+
+            Wolfe = nll_new < nll + 1e-4 * np.dot((params_new - params), grad)
+            if not Wolfe:
+                if not current:
+                    alpha_mat /= 2
+                    current = True
+                    continue
+            else:
+                current = False   
 
             params_list.append(params_new)
 

@@ -13,7 +13,7 @@ import plot as pl_func
 plot = False
 
 # plot for report
-plot_all = False
+plot_all = True
 
 if plot_all:
     # set the directory path
@@ -77,7 +77,7 @@ for i in range(N_MC):
     _, _, _, params_list = min_func.Monte_Carlo(
         [theta_guess, dm2_guess, alpha_guess],
         T0, step,
-        num_max=2000,
+        num_max=4000,
         method='FSA',
         printout=False
         )
@@ -133,7 +133,7 @@ for i in range(N_MC):
     _, _, _, params_list = min_func.Monte_Carlo(
         [theta_guess, dm2_guess, alpha_guess],
         T0, step, rho,
-        num_max=15000,
+        num_max=16000,
         method='CSA',
         printout=False
         )
@@ -145,7 +145,7 @@ for i in range(N_MC):
     alpha_entry += alpha_plot.tolist()
 
 # fit distribution with Gaussian
-plot_mul = True
+plot_mul = plot
 print('\ntheta_min')
 theta_min, _ = pl_func.fit_MC(
     var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",

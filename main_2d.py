@@ -16,16 +16,19 @@ import plot as pl_func
 # plot one method per graph
 plot = False
 
+# plot for report
+plot_all = True
 
-# set the directory path
-dir_path = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(dir_path)
+if plot_all:
+    # set the directory path
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    sys.path.append(dir_path)
 
-# make new folder
-folder_name = '/plots-2D'
-dir_folder = dir_path + folder_name
-filename = dir_folder + '/placeholder.txt'
-os.makedirs(os.path.dirname(filename), exist_ok=True)
+    # make new folder
+    folder_name = '/plots-2D'
+    dir_folder = dir_path + folder_name
+    filename = dir_folder + '/placeholder.txt'
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
 
 
 # minimisation class
@@ -48,7 +51,6 @@ theta_low = 0.62
 
 
 # plot multiple methods on one graph
-plot_all = True
 if plot_all:
     # generate data to plot
     theta_list = np.linspace(theta_low, theta_high, N)
@@ -507,7 +509,7 @@ for i in range(N_MC):
     _, _, _, params_list = min_func.Monte_Carlo(
         [theta_guess, dm2_guess],
         T0, step,
-        num_max=4000,
+        num_max=8000,
         method='CSA',
         printout=False
         )
@@ -560,7 +562,7 @@ for i in range(N_MC):
     _, _, _, params_list = min_func.Monte_Carlo(
         [theta_guess, dm2_guess],
         T0, step,
-        num_max=2000,
+        num_max=4000,
         method='FSA',
         printout=False
         )
