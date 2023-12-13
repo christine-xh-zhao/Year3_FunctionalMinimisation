@@ -14606,16 +14606,19 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <span class="c1"># plot one method per graph</span>
 <span class="n">plot</span> <span class="o">=</span> <span class="kc">False</span>
 
+<span class="c1"># plot for report</span>
+<span class="n">plot_all</span> <span class="o">=</span> <span class="kc">True</span>
 
-<span class="c1"># set the directory path</span>
-<span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dir_path</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">plot_all</span><span class="p">:</span>
+    <span class="c1"># set the directory path</span>
+    <span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dir_path</span><span class="p">)</span>
 
-<span class="c1"># make new folder</span>
-<span class="n">folder_name</span> <span class="o">=</span> <span class="s1">'/plots-3D'</span>
-<span class="n">dir_folder</span> <span class="o">=</span> <span class="n">dir_path</span> <span class="o">+</span> <span class="n">folder_name</span>
-<span class="n">filename</span> <span class="o">=</span> <span class="n">dir_folder</span> <span class="o">+</span> <span class="s1">'/placeholder.txt'</span>
-<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># make new folder</span>
+    <span class="n">folder_name</span> <span class="o">=</span> <span class="s1">'/plots-3D'</span>
+    <span class="n">dir_folder</span> <span class="o">=</span> <span class="n">dir_path</span> <span class="o">+</span> <span class="n">folder_name</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">dir_folder</span> <span class="o">+</span> <span class="s1">'/placeholder.txt'</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
 <span class="c1"># minimisation class</span>
@@ -14668,7 +14671,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
     <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">params_list</span> <span class="o">=</span> <span class="n">min_func</span><span class="o">.</span><span class="n">Monte_Carlo</span><span class="p">(</span>
         <span class="p">[</span><span class="n">theta_guess</span><span class="p">,</span> <span class="n">dm2_guess</span><span class="p">,</span> <span class="n">alpha_guess</span><span class="p">],</span>
         <span class="n">T0</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span>
-        <span class="n">num_max</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+        <span class="n">num_max</span><span class="o">=</span><span class="mi">4000</span><span class="p">,</span>
         <span class="n">method</span><span class="o">=</span><span class="s1">'FSA'</span><span class="p">,</span>
         <span class="n">printout</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
@@ -14711,8 +14714,8 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <span class="n">theta_guess</span> <span class="o">=</span> <span class="mf">0.7</span>
 <span class="n">dm2_guess</span> <span class="o">=</span> <span class="mf">2.5e-3</span>
 <span class="n">alpha_guess</span> <span class="o">=</span> <span class="mf">1.2</span>
-<span class="n">T0</span> <span class="o">=</span> <span class="mi">25</span>
-<span class="n">step</span> <span class="o">=</span> <span class="mf">1e-3</span>
+<span class="n">T0</span> <span class="o">=</span> <span class="mi">750</span>
+<span class="n">step</span> <span class="o">=</span> <span class="mf">1.25e-1</span>
 <span class="n">rho</span> <span class="o">=</span> <span class="mf">0.8</span>
 
 <span class="c1"># loop</span>
@@ -14724,7 +14727,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
     <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">params_list</span> <span class="o">=</span> <span class="n">min_func</span><span class="o">.</span><span class="n">Monte_Carlo</span><span class="p">(</span>
         <span class="p">[</span><span class="n">theta_guess</span><span class="p">,</span> <span class="n">dm2_guess</span><span class="p">,</span> <span class="n">alpha_guess</span><span class="p">],</span>
         <span class="n">T0</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span>
-        <span class="n">num_max</span><span class="o">=</span><span class="mi">4000</span><span class="p">,</span>
+        <span class="n">num_max</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span>
         <span class="n">method</span><span class="o">=</span><span class="s1">'CSA'</span><span class="p">,</span>
         <span class="n">printout</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
@@ -14900,7 +14903,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <span class="sd">'''</span>
 <span class="sd">Plot to compare with the observed data</span>
 <span class="sd">'''</span>
-<span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+<span class="k">if</span> <span class="n">plot_all</span><span class="p">:</span>
     <span class="n">pl_func</span><span class="o">.</span><span class="n">data_aligned_3D</span><span class="p">(</span><span class="n">theta_new</span><span class="p">,</span> <span class="n">dm2_new</span><span class="p">,</span> <span class="n">alpha_new</span><span class="p">,</span> <span class="n">dir_folder</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
@@ -14931,8 +14934,8 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 
 theta_min
 Gaussian fit
-Fit centre = 0.7528688 +/- 0.0001608
-with % error +/- 0.021
+Fit centre = 0.7529918 +/- 0.0000613
+with % error +/- 0.008
 
 dm2_min
 Gaussian fit
@@ -14941,47 +14944,47 @@ with % error +/- 0.001
 
 alpha_min
 Gaussian fit
-Fit centre = 1.2952365 +/- 0.0000966
-with % error +/- 0.007
+Fit centre = 1.2951739 +/- 0.0000595
+with % error +/- 0.005
 
 Uncertainties from Hessian
 
-theta_min = 0.7529 +/- 0.0213
-with % error +/- 2.83
+theta_min = 0.7530 +/- 0.0214
+with % error +/- 2.84
 
 dm2_min = 0.0025126 +/- 0.0000263
 with % error +/- 1.05
 
-alpha_min = 1.2952365 +/- 0.0560232
-with % error +/- 4.33
+alpha_min = 1.2951739 +/- 0.0559580
+with % error +/- 4.32
 
 -- Run CSA 10 times and estimate from distribution --
 
 theta_min
 Gaussian fit
-Fit centre = 0.7159748 +/- 0.0006311
-with % error +/- 0.088
+Fit centre = 0.7541134 +/- 0.0071801
+with % error +/- 0.952
 
 dm2_min
 Gaussian fit
-Fit centre = 0.0025237 +/- 0.0000093
-with % error +/- 0.368
+Fit centre = 0.0025115 +/- 0.0000008
+with % error +/- 0.032
 
 alpha_min
 Gaussian fit
-Fit centre = 1.1996816 +/- 0.0037289
-with % error +/- 0.311
+Fit centre = 1.2959993 +/- 0.0057410
+with % error +/- 0.443
 
 Uncertainties from Hessian
 
-theta_min = 0.7160 +/- 0.0182
-with % error +/- 2.54
+theta_min = 0.7541 +/- 0.0218
+with % error +/- 2.89
 
-dm2_min = 0.0025237 +/- 0.0000278
-with % error +/- 1.10
+dm2_min = 0.0025115 +/- 0.0000264
+with % error +/- 1.05
 
-alpha_min = 1.1996816 +/- 0.0532880
-with % error +/- 4.44
+alpha_min = 1.2959993 +/- 0.0560919
+with % error +/- 4.33
 
 ---------------------------
 --- 3D Gradient descent ---
@@ -15006,11 +15009,11 @@ with % error +/- 4.33
 ------------------------------
 --- 3D Quasi-Newton method ---
 
-Stopping condition 1e-10 reached after 11 iterations
+Stopping condition 1e-10 reached after 13 iterations
 Minimum of nll = 622.9842267875922 is at
-theta = 0.7528507314084658
-dm2 = 0.002512536084710395
-alpha = 1.2948094434876967
+theta = 0.7528507295536465
+dm2 = 0.0025125360828885356
+alpha = 1.294809443182248
 
 Uncertainties from Hessian
 
@@ -15020,8 +15023,8 @@ with % error +/- 2.83
 dm2_min = 0.0025125 +/- 0.0000263
 with % error +/- 1.05
 
-alpha_min = 1.2948094 +/- 0.0559070
-with % error +/- 4.32
+alpha_min = 1.2948094 +/- 0.0560114
+with % error +/- 4.33
 
 --------------------------
 --- 3D Newton&#39;s method ---
@@ -15047,10 +15050,10 @@ with % error +/- 4.31
 --- Univariate method ---
 
 Stopping condition 1e-10 reached after 25 iterations
-Minimum of nll = 622.9842267878657 is at
-theta = 0.7528503992863084
-dm2 = 0.0025125359499426764
-alpha = 1.2948089702291892
+Minimum of nll = 622.9842267878382 is at
+theta = 0.752850401240494
+dm2 = 0.0025125359753433996
+alpha = 1.2948091410766935
 
 Uncertainties from Hessian
 
@@ -15060,8 +15063,8 @@ with % error +/- 2.83
 dm2_min = 0.0025125 +/- 0.0000263
 with % error +/- 1.05
 
-alpha_min = 1.2948090 +/- 0.0560223
-with % error +/- 4.33
+alpha_min = 1.2948091 +/- 0.0559955
+with % error +/- 4.32
 </pre>
 </div>
 </div>
