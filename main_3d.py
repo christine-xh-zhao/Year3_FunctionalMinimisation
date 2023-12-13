@@ -12,16 +12,19 @@ import plot as pl_func
 # plot one method per graph
 plot = False
 
+# plot for report
+plot_all = False
 
-# set the directory path
-dir_path = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(dir_path)
+if plot_all:
+    # set the directory path
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    sys.path.append(dir_path)
 
-# make new folder
-folder_name = '/plots-3D'
-dir_folder = dir_path + folder_name
-filename = dir_folder + '/placeholder.txt'
-os.makedirs(os.path.dirname(filename), exist_ok=True)
+    # make new folder
+    folder_name = '/plots-3D'
+    dir_folder = dir_path + folder_name
+    filename = dir_folder + '/placeholder.txt'
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
 
 
 # minimisation class
@@ -306,5 +309,5 @@ if plot:
 '''
 Plot to compare with the observed data
 '''
-if True:
+if plot_all:
     pl_func.data_aligned_3D(theta_new, dm2_new, alpha_new, dir_folder, plot=True)
