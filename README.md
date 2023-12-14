@@ -5,7 +5,7 @@ This is the project of the Year 3 elective module of Computational Physics 2023-
 
 ## About the code
 
-### main modules - the code does all the work
+### Main modules - the code does all the work
 
 - `main_1d.py` - produces general plots, does 1D minimisation, and examines the methods of uncertainty estimation
 - `main_2d.py` - does 2D minimisation, produces final histogram, and performs hypothesis testing
