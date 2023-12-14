@@ -66,7 +66,7 @@ if plot_all:
     nll_list = np.array(nll_list)
 
     # plot colours
-    fig, axes = plt.subplots(2, 1, figsize=(4, 6))
+    fig, axes = plt.subplots(2, 1, figsize=(3.5, 5.5))
     ax1 = axes[0]
     ax2 = axes[1]
 
@@ -499,7 +499,7 @@ for i in range(N_MC):
     _, _, _, params_list = min_func.Monte_Carlo(
         [theta_guess, dm2_guess],
         T0, step,
-        num_max=8000,
+        num_max=1.2e4,
         method='CSA',
         printout=False
         )
@@ -511,16 +511,17 @@ for i in range(N_MC):
 
 # fit distribution with Gaussian
 plot_mul = plot_all
-print('\ntheta_min')
-theta_min, _ = pl_func.fit_MC(
-    var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
-    N=N_MC, dir_folder=dir_folder, var_string='theta', plot=plot_mul
-    )
-print('\ndm2_min')
-dm2_min, _ = pl_func.fit_MC(
-    var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$",
-    N=N_MC, dir_folder=dir_folder, var_string='dm2', plot=plot_mul
-    )
+if plot_mul:
+    print('\ntheta_min')
+    theta_min, _ = pl_func.fit_MC(
+        var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
+        N=N_MC, dir_folder=dir_folder, var_string='theta', plot=plot_mul
+        )
+    print('\ndm2_min')
+    dm2_min, _ = pl_func.fit_MC(
+        var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$",
+        N=N_MC, dir_folder=dir_folder, var_string='dm2', plot=plot_mul
+        )
 
 # estimate error
 print('\nUncertainties from Hessian')
@@ -564,16 +565,17 @@ for i in range(N_MC):
 
 # fit distribution
 plot_mul = plot_all
-print('\ntheta_min')
-theta_min, _ = pl_func.fit_MC(
-    var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
-    N=N_MC, dir_folder=dir_folder, var_string='theta', FSA=True, plot=plot_mul
-    )
-print('\ndm2_min')
-dm2_min, _ = pl_func.fit_MC(
-    var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$",
-    N=N_MC, dir_folder=dir_folder, var_string='dm2', FSA=True, plot=plot_mul
-    )
+if plot_mul:
+    print('\ntheta_min')
+    theta_min, _ = pl_func.fit_MC(
+        var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
+        N=N_MC, dir_folder=dir_folder, var_string='theta', FSA=True, plot=plot_mul
+        )
+    print('\ndm2_min')
+    dm2_min, _ = pl_func.fit_MC(
+        var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$",
+        N=N_MC, dir_folder=dir_folder, var_string='dm2', FSA=True, plot=plot_mul
+        )
 
 # estimate error
 print('\nUncertainties from Hessian')

@@ -447,7 +447,7 @@ class Minimiser():
 
             det_hes = np.linalg.det(hes)  # ensure Hessian is positive definite
             if det_hes <= 0:
-                print('Determinant of Hessian <= 0')
+                print('Determinant of Hessian <= 0 at iteration', num)
 
             hes_inv = np.linalg.inv(hes)
 
@@ -482,7 +482,7 @@ class Minimiser():
 
         return params_new, nll_new, err_list, np.array(params_list).T
 
-    def quasi_Newton(self, params, alpha, function=None, num_max=100, stop_cond=1e-10):
+    def quasi_Newton(self, params, alpha, alpha_frac=2, function=None, num_max=100, stop_cond=1e-10):
         """
         Quasi-Newton method
         """
@@ -511,6 +511,7 @@ class Minimiser():
             # if iteration is updated
             if not current:
                 alpha = 1  # reset alpha
+                alpha_old = 1
 
             # inverse hessian
             hes_inv = 1. * G
@@ -519,14 +520,26 @@ class Minimiser():
             params_new = params - np.dot(hes_inv, grad) * alpha
             nll_new = function(params_new)
 
-            Wolfe = nll_new < nll + 1e-4 * np.dot((params_new - params), grad)
+            # Wolfe condition
+            Wolfe = nll_new <= nll + 1e-4 * np.dot((params_new - params), grad)
             if not Wolfe:
+                # if at new iteration
                 if not current:
-                    alpha /= 2
-                    current = True
+                    current = True  # so that alpha is not reset
+
+                alpha /= alpha_frac  # reduced alpha by a fixed fraction
+
+                # if alpha is smaller than stopping condition or is not updated
+                if alpha < 1e-10 or alpha_old == alpha:
+                    print('Bad inital guess, method cannot converge at iteration', num)
+                    break
+                else:
+                    # save alpha for comparison
+                    alpha_old = 1. * alpha
                     continue
             else:
-                current = False   
+                # iteration is updated, alpha will be reset
+                current = False  
 
             params_list.append(params_new)
 
@@ -571,7 +584,7 @@ class Minimiser():
 
         return params_new, nll_new, err_list, np.array(params_list).T
 
-    def gradient_descent(self, params, alpha, function=None, num_max=100, stop_cond=1e-10):
+    def gradient_descent(self, params, alpha, alpha_frac=2, function=None, num_max=100, stop_cond=1e-10):
         """
         Gradient descent
         """
@@ -604,23 +617,35 @@ class Minimiser():
         while True:
             # if iteration is updated
             if not current:
-                alpha_mat = alpha_mat0  # reset alpha
+                alpha_mat = 1. * alpha_mat0  # reset alpha
+                alpha_mat_old = 1. * alpha_mat0
 
             # gradient of function
             grad = un.gradient(f=function, x=params)
 
             # update parameters and nll
             params_new = params - np.dot(alpha_mat, grad)
-            # params_new = params - grad * alpha
             nll_new = function(params_new)
 
-            Wolfe = nll_new < nll + 1e-4 * np.dot((params_new - params), grad)
+            # Wolfe condition
+            Wolfe = nll_new <= nll + 1e-4 * np.dot((params_new - params), grad)
             if not Wolfe:
+                # if at new iteration
                 if not current:
-                    alpha_mat /= 2
-                    current = True
+                    current = True  # so that alpha is not reset
+
+                alpha_mat /= alpha_frac  # reduced alpha by a fixed fraction
+
+                # if alpha is smaller than stopping condition or is not updated
+                if alpha_mat[0, 0] < stop_cond or alpha_mat_old[0, 0] == alpha_mat[0, 0]:
+                    print('Bad inital guess, method cannot converge at iteration', num)
+                    break
+                else:
+                    # save alpha for comparison
+                    alpha_mat_old = 1. * alpha_mat
                     continue
             else:
+                # iteration is updated, alpha will be reset
                 current = False   
 
             params_list.append(params_new)

@@ -1,14 +1,16 @@
 """
 Method comparison with known function
+
+Note on parameter names:
+- theta = x
+- dm2 = y
+- nll = z
 """
 
 import numpy as np
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 
-
-import function as fc
-import load_data as ld
 import minimiser as mi
 import uncertainty as un
 import plot as pl_func
@@ -22,7 +24,6 @@ min_func = mi.Minimiser()
 def function(params):
     X, Y = params[0], params[1]
     Z = (-np.cos(2*np.pi*(X)) * np.cos(np.pi*(Y))) / (1 + np.power(X, 2) + np.power(Y, 2))
-    # Z = np.sin(np.pi*X)*np.sin(np.pi*Y)
     return Z
 
 
@@ -80,8 +81,7 @@ if True:
         )
 
     # plot contours 
-    ax.contour(X, Y, Z, 7, offset=-1.2, linewidth=0.5, cmap=cm.jet, linestyles="solid")
-
+    ax.contour(X, Y, Z, 7, offset=-1.2, cmap=cm.jet, linestyles="solid")
 
     fig.colorbar(surf, shrink=0.5, aspect=10, pad=0.1, label=r"$f \/ (x,y)$")
 
@@ -112,8 +112,8 @@ run_once = False
 print('\n- Classical simulated annealing -\n')
 
 # inital guess same as before
-theta_guess = -1.5
-dm2_guess = 1.5
+x_guess = -1.5
+y_guess = 1.5
 T0 = 50
 rho = 0.5
 step = 5e-1
@@ -121,25 +121,25 @@ stop_cond = 1e-10
 
 if True:
     # Monte-Carlo classical simulated annealing
-    params, nll_min, err_list, params_list = min_func.Monte_Carlo(
-        [theta_guess, dm2_guess],
+    params, z_min, err_list, params_list = min_func.Monte_Carlo(
+        [x_guess, y_guess],
         T0, step, rho,
         num_max=5000, stop_cond=stop_cond,
         function=function,
         method='CSA'
         )
 
-    theta_min, dm2_min = params[0], params[1]
-    theta_plot, dm2_plot = params_list[0], params_list[1]
+    x_min, y_min = params[0], params[1]
+    x_plot, y_plot = params_list[0], params_list[1]
 
     # plot
     if True:
-        visualise(X, Y, Z, theta_min, dm2_min, theta_plot, dm2_plot)
+        visualise(X, Y, Z, x_min, y_min, x_plot, y_plot)
 
     if True:
         pl_func.change_nll(
             err_list,
-            label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$",
+            label=r"$x$" + ' & ' + r"$y$",
             stop=stop_cond
             )
 
@@ -147,33 +147,33 @@ if True:
 print('\n\n- Fast simulated annealing -\n')
 
 # inital guess
-theta_guess = -1.5
-dm2_guess = 1.5
+x_guess = -1.5
+y_guess = 1.5
 T0 = 1000
 step = 1e-2
 stop_cond = 1e-16
 
 if True:
     # Monte-Carlo fast simulated annealing
-    params, nll_min, err_list, params_list = min_func.Monte_Carlo(
-        [theta_guess, dm2_guess],
+    params, z_min, err_list, params_list = min_func.Monte_Carlo(
+        [x_guess, y_guess],
         T0, step,
         num_max=5e4, stop_cond=stop_cond,
         function=function,
         method='FSA'
         )
 
-    theta_min, dm2_min = params[0], params[1]
-    theta_plot, dm2_plot = params_list[0], params_list[1]
+    x_min, y_min = params[0], params[1]
+    x_plot, y_plot = params_list[0], params_list[1]
 
     # plot
     if True:
-        visualise(X, Y, Z, theta_min, dm2_min, theta_plot, dm2_plot)
+        visualise(X, Y, Z, x_min, y_min, x_plot, y_plot)
 
     if True:
         pl_func.change_nll(
             err_list,
-            label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$",
+            label=r"$x$" + ' & ' + r"$y$",
             stop=stop_cond
             )
 
@@ -186,30 +186,137 @@ print('-'*24)
 print('--- Gradient descent ---\n')
 
 # gradient descent
-theta_guess = -0.25
-dm2_guess = 0.25
+x_guess = -0.25
+y_guess = 0.45
 stop_cond = 1e-10
 
-params, nll_min, err_list, params_list = min_func.gradient_descent(
-    [theta_guess, dm2_guess],
+params, z_min, err_list, params_list = min_func.gradient_descent(
+    [x_guess, y_guess],
     alpha=6e-2,
+    alpha_frac=5,
     function=function,
     num_max=100, stop_cond=stop_cond
     )
 
-theta_min, dm2_min = params[0], params[1]
-theta_plot, dm2_plot = params_list[0], params_list[1]
-
+x_min, y_min = params[0], params[1]
+x_plot, y_plot = params_list[0], params_list[1]
 
 # plot
 if True:
     if True:
-        visualise(X, Y, Z, theta_min, dm2_min, theta_plot, dm2_plot)
+        visualise(X, Y, Z, x_min, y_min, x_plot, y_plot)
 
     if True:
         pl_func.change_nll(
             err_list,
-            label=r"$\theta_{23}$" + ' & ' + r"$\Delta m_{23}^2$",
+            label=r"$x$" + ' & ' + r"$y$",
+            stop=stop_cond
+            )
+
+
+'''
+Quasi-Newton method
+'''
+print()
+print('-'*27)
+print('--- Quasi-Newton method ---\n')
+
+# Quasi-Newton
+x_guess = -0.15
+y_guess = 0.15
+stop_cond = 1e-10
+
+params, z_min, err_list, params_list = min_func.quasi_Newton(
+    [x_guess, y_guess],
+    alpha=1,
+    alpha_frac=1.1,
+    function=function,
+    num_max=100, stop_cond=stop_cond
+    )
+
+x_min, y_min = params[0], params[1]
+x_plot, y_plot = params_list[0], params_list[1]
+
+# plot
+if True:
+    if True:
+        visualise(X, Y, Z, x_min, y_min, x_plot, y_plot)
+
+    if True:
+        pl_func.change_nll(
+            err_list,
+            label=r"$x$" + ' & ' + r"$y$",
             stop=stop_cond
             )
         
+
+'''
+Newton's method
+'''
+print()
+print('-'*23)
+print('--- Newton\'s method ---\n')
+
+# Newtons
+x_guess = -0.06
+y_guess = 0.06
+stop_cond = 5e-8
+
+params, z_min, err_list, params_list = min_func.Newtons(
+    [x_guess, y_guess],
+    function=function,
+    num_max=100, stop_cond=stop_cond
+    )
+
+x_min, y_min = params[0], params[1]
+x_plot, y_plot = params_list[0], params_list[1]
+
+# plot
+if True:
+    if True:
+        visualise(X, Y, Z, x_min, y_min, x_plot, y_plot)
+
+    if True:
+        pl_func.change_nll(
+            err_list,
+            label=r"$x$" + ' & ' + r"$y$",
+            stop=stop_cond
+            )
+        
+
+'''
+Univariate method
+'''
+print()
+print('-'*25)
+print('--- Univariate method ---\n')
+
+# univariate
+x_guess = -0.15
+y_guess = 0.2
+stop_cond = 1e-10
+
+(x_min, y_min, z_min,
+ err_list,
+ x_plot, y_plot,
+ x_all, y_all) = min_func.univariate(
+    [x_guess, y_guess],
+    [150, 150],
+    function=function,
+    num_max=100, stop_cond=stop_cond
+    )
+
+# plot
+if True:
+    if True:
+        visualise(X, Y, Z, x_min, y_min, x_plot, y_plot)
+
+    if True:
+        pl_func.change_nll(
+            err_list,
+            label=r"$x$" + ' & ' + r"$y$",
+            stop=stop_cond
+            )
+
+
+print('The global minimum known to be at x = 0, y = 0, with z = -1') 
