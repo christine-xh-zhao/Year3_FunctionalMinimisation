@@ -133,7 +133,7 @@ for i in range(N_MC):
     _, _, _, params_list = min_func.Monte_Carlo(
         [theta_guess, dm2_guess, alpha_guess],
         T0, step, rho,
-        num_max=16000,
+        num_max=2e4,
         method='CSA',
         printout=False
         )

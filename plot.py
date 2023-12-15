@@ -46,7 +46,7 @@ def data_aligned(energy, data_osc, data_unosc, width, dir_folder, plot=True):
         col_ax = 'C2'
         col_ax2 = 'C4'
 
-        fig, ax = plt.subplots(figsize=(5, 2.5))
+        fig, ax = plt.subplots(figsize=(4, 2))
         ax2 = ax.twinx()
 
         ax.bar(energy, data_osc, width, align="edge", color=col_ax, alpha=0.9,
@@ -56,8 +56,8 @@ def data_aligned(energy, data_osc, data_unosc, width, dir_folder, plot=True):
         ax2.bar(energy, data_unosc, width, align="edge", color=col_ax2, alpha=0.75)
 
         ax.set_xlabel("Energy [GeV]")
-        ax.set_ylabel(r"Number of entries", color=col_ax)
-        ax2.set_ylabel(r"Number of entries", color=col_ax2)
+        ax.set_ylabel(r"Number of $\nu_\mu$ entries", color=col_ax)
+        ax2.set_ylabel(r"Number of $\nu_\mu$ entries", color=col_ax2)
 
         ax.tick_params(axis="y", colors=col_ax)
         ax2.tick_params(axis="y", colors=col_ax2)
@@ -89,7 +89,7 @@ def data_aligned_2D(theta, dm2, dir_folder, plot=True):
         col_ax = 'C2'
         col_ax2 = 'C4'
 
-        fig, ax = plt.subplots(figsize=(5, 2.5))
+        fig, ax = plt.subplots(figsize=(4, 2))
 
         ax.bar(energy, data_osc, width, align="edge", color=col_ax, alpha=0.9,
                label="Observed")
@@ -141,7 +141,7 @@ def data_aligned_3D(theta, dm2, alpha, dir_folder, plot=True):
         col_ax = 'C2'
         col_ax2 = 'C4'
 
-        fig, ax = plt.subplots(figsize=(5, 2.5))
+        fig, ax = plt.subplots(figsize=(4, 2.5))
 
         ax.bar(energy, data_osc, width, align="edge", color=col_ax, alpha=0.9,
                label="Observed")
@@ -160,7 +160,7 @@ def data_aligned_3D(theta, dm2, alpha, dir_folder, plot=True):
         ax.set_xlabel("Energy [GeV]")
         ax.set_ylabel(r"Number of $\nu_\mu$ entries")
 
-        ax.legend()
+        ax.legend(loc='upper right')
         ax.grid(lw=0.4)
 
         png1 = io.BytesIO()
@@ -173,7 +173,7 @@ def data_aligned_3D(theta, dm2, alpha, dir_folder, plot=True):
         plt.show()
 
         # Goodness of fit test
-        doff = len(data_osc) - 2  # degree of freedom
+        doff = len(data_osc) - 3  # degree of freedom
         chi2 = fc.chi2(data_osc, data_unosc_prob, doff)  # chi squared value
         p = 1 - stats.chi2.cdf(chi2, doff)  # p value
         print('\nGoodness of fit test:')
@@ -186,7 +186,7 @@ def neutrino_prob_sing(energy, dir_folder, plot=True):
 
     # plot neutrino probability against energy
     if plot:
-        fig = plt.figure(figsize=(5, 2))
+        fig = plt.figure(figsize=(4, 1.5))
         p = plt.plot(energy, fc.neutrino_prob(E=energy))
 
         props = dict(boxstyle='round', facecolor='white', alpha=1,
@@ -194,10 +194,10 @@ def neutrino_prob_sing(energy, dir_folder, plot=True):
         text = r"$\theta_{23}$ = $\pi/4$" + r" $[rad]$" + "\n" + \
                r"$\Delta m^2_{23}$" + \
                r"= 2.4" + r" $[10^{-3} \/ \/ eV^2]$"
-        plt.annotate(text, (0.5, 0.09), xycoords="axes fraction", size=12, bbox=props)
+        plt.annotate(text, (0.48, 0.11), xycoords="axes fraction", size=10, bbox=props)
 
         plt.xlabel("Energy [GeV]")
-        plt.ylabel(r"Survival Probability $\nu_\mu\rightarrow\nu_\mu$")
+        plt.ylabel(r"Survival Probability")
 
         plt.grid(lw=0.4)
 
@@ -274,7 +274,7 @@ def nll_1d_theta(
         nll_list = np.array(nll_list)
 
         # plot theta against nll with fixted theta
-        fig = plt.figure(figsize=(5, 2.5))
+        fig = plt.figure(figsize=(4, 2))
         p = plt.plot(theta_list, nll_list)
 
         props = dict(boxstyle='round', facecolor='white', alpha=1,
@@ -518,7 +518,7 @@ def fit_MC(var_list, var, N, dir_folder=None, var_string='', std_ratio=0.005, Lo
 
     # plot
     if plot:
-        plt.figure(1, figsize=(3, 3))
+        plt.figure(1, figsize=(2.5, 2.5))
 
         if Lorentz and FSA:
             label1 = 'FSA'

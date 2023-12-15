@@ -66,8 +66,7 @@ if plot_all:
     nll_list = np.array(nll_list)
 
     # plot colours
-    # fig, ax1 = plt.subplots(121, figsize=(4, 2.5))
-    fig, axes = plt.subplots(2, 1, figsize=(5, 4.5))
+    fig, axes = plt.subplots(2, 1, figsize=(3.5, 5.5))
     ax1 = axes[0]
     ax2 = axes[1]
 
@@ -75,22 +74,15 @@ if plot_all:
         theta_list, dm2_list, nll_list,
         levels=500,
         cmap='nipy_spectral',
-        # cmap='GnBu_r'
         )
 
-    ax1.annotate ("a)", (-0.15, 1.00), xycoords = "axes fraction")
-
-    # ax1.set_xlabel(r"$\theta_{23}$ $[rad]$")
     ax1.set_ylabel(r"$\Delta m_{23}^2$ $[eV^2]$")
+    ax1.annotate ("a)", (-0.15, 1.075), xycoords = "axes fraction")
 
     # plot contours
     cntr1.levels = cntr1.levels.tolist()
     ax1.contour(cntr1, levels=cntr1.levels[1:30:8], colors='w', alpha=0.5)
     ax1.contour(cntr1, levels=cntr1.levels[40:-1:42], colors='w', alpha=0.5)
-
-    plt.subplots_adjust(hspace=0.2, top=0.95, bottom=0.1)
-
-    # fig.colorbar(cntr1, ax=ax1, label="Negative Log Likelihood")
 
 
 '''
@@ -294,16 +286,7 @@ if plot_all:
     V = np.subtract(dm2_plot[1:], dm2_plot[:-1])
     ax1.quiver(X, Y, U, V, color="silver", angles='xy', scale_units='xy', scale=1, label='Gradient descent')
 
-    # ax1.legend()
-
-    # png1 = io.BytesIO()
-    # plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
-    #             bbox_inches='tight')
-    # png2 = Image.open(png1)
-    # png2.save(dir_folder + "/visualise-4-methods.png")
-    # png1.close()
-
-    # plt.show()
+    ax1.legend()
 
 
 '''
@@ -336,25 +319,22 @@ if plot_all:
     nll_list = np.array(nll_list)
 
     # plot colours
-    plt.subplots(122, figsize=(4, 2.5))
-    cntr1 = ax2.contourf(
+    plt.subplot(2, 1, 2)
+    cntr2 = ax2.contourf(
         theta_list, dm2_list, nll_list,
         levels=500,
         cmap='nipy_spectral',
-        # cmap='GnBu_r'
         )
 
     ax2.set_xlabel(r"$\theta_{23}$ $[rad]$")
     ax2.set_ylabel(r"$\Delta m_{23}^2$ $[eV^2]$")
+    
+    ax2.annotate ("b)", (-0.15, 1.075), xycoords="axes fraction")
 
     # plot contours
-    cntr1.levels = cntr1.levels.tolist()
-    ax2.contour(cntr1, levels=cntr1.levels[1:30:8], colors='w', alpha=0.5)
-    ax2.contour(cntr1, levels=cntr1.levels[40:-1:42], colors='w', alpha=0.5)
-
-    plt.subplots_adjust(hspace=0.2, top=0.95, bottom=0.1)
-
-    fig.colorbar(cntr1, ax=axes, label="Negative Log Likelihood")
+    cntr2.levels = cntr2.levels.tolist()
+    ax2.contour(cntr2, levels=cntr2.levels[1:30:8], colors='w', alpha=0.5)
+    ax2.contour(cntr2, levels=cntr2.levels[40:-1:42], colors='w', alpha=0.5)
 
 
 print('\n- Classical simulated annealing -\n')
@@ -380,7 +360,7 @@ if run_once:
     params, nll_min, err_list, params_list = min_func.Monte_Carlo(
         [theta_guess, dm2_guess],
         T0, step, rho,
-        num_max=1e4, stop_cond=stop_cond,
+        num_max=1.2e4, stop_cond=stop_cond,
         method='CSA'
         )
 
@@ -415,7 +395,7 @@ if plot_all:
     X, Y = theta_plot[:-1], dm2_plot[:-1]
     U = np.subtract(theta_plot[1:], theta_plot[:-1])
     V = np.subtract(dm2_plot[1:], dm2_plot[:-1])
-    ax1.quiver(X, Y, U, V, color="silver", angles='xy', scale_units='xy', scale=1, label='CSA')
+    ax2.quiver(X, Y, U, V, color="silver", angles='xy', scale_units='xy', scale=1, label='CSA')
 
 
 print('\n\n- Fast simulated annealing -\n')
@@ -439,7 +419,7 @@ if run_once:
     params, nll_min, err_list, params_list = min_func.Monte_Carlo(
         [theta_guess, dm2_guess],
         T0, step,
-        num_max=1e4, stop_cond=stop_cond,
+        num_max=1.2e4, stop_cond=stop_cond,
         method='FSA'
         )
 
@@ -474,15 +454,19 @@ if plot_all:
     X, Y = theta_plot[:-1], dm2_plot[:-1]
     U = np.subtract(theta_plot[1:], theta_plot[:-1])
     V = np.subtract(dm2_plot[1:], dm2_plot[:-1])
-    ax1.quiver(X, Y, U, V, color="white", angles='xy', scale_units='xy', scale=1, label='FSA')
+    ax2.quiver(X, Y, U, V, color="white", angles='xy', scale_units='xy', scale=1, label='FSA')
 
-    ax1.legend()
+    ax2.legend()
+
+    plt.subplots_adjust(hspace=0.2, top=0.95, bottom=0.1)
+
+    fig.colorbar(cntr1, ax=axes, label="Negative Log Likelihood")
 
     png1 = io.BytesIO()
     plt.savefig(png1, format="png", dpi=500, pad_inches=.1,
                 bbox_inches='tight')
     png2 = Image.open(png1)
-    png2.save(dir_folder + "/visualise-2-MCs.png")
+    png2.save(dir_folder + "/visualise-all.png")
     png1.close()
 
     plt.show()
@@ -515,7 +499,7 @@ for i in range(N_MC):
     _, _, _, params_list = min_func.Monte_Carlo(
         [theta_guess, dm2_guess],
         T0, step,
-        num_max=8000,
+        num_max=1.2e4,
         method='CSA',
         printout=False
         )
@@ -527,16 +511,17 @@ for i in range(N_MC):
 
 # fit distribution with Gaussian
 plot_mul = plot_all
-print('\ntheta_min')
-theta_min, _ = pl_func.fit_MC(
-    var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
-    N=N_MC, dir_folder=dir_folder, var_string='theta', plot=plot_mul
-    )
-print('\ndm2_min')
-dm2_min, _ = pl_func.fit_MC(
-    var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$",
-    N=N_MC, dir_folder=dir_folder, var_string='dm2', plot=plot_mul
-    )
+if plot_mul:
+    print('\ntheta_min')
+    theta_min, _ = pl_func.fit_MC(
+        var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
+        N=N_MC, dir_folder=dir_folder, var_string='theta', plot=plot_mul
+        )
+    print('\ndm2_min')
+    dm2_min, _ = pl_func.fit_MC(
+        var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$",
+        N=N_MC, dir_folder=dir_folder, var_string='dm2', plot=plot_mul
+        )
 
 # estimate error
 print('\nUncertainties from Hessian')
@@ -580,16 +565,17 @@ for i in range(N_MC):
 
 # fit distribution
 plot_mul = plot_all
-print('\ntheta_min')
-theta_min, _ = pl_func.fit_MC(
-    var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
-    N=N_MC, dir_folder=dir_folder, var_string='theta', FSA=True, plot=plot_mul
-    )
-print('\ndm2_min')
-dm2_min, _ = pl_func.fit_MC(
-    var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$",
-    N=N_MC, dir_folder=dir_folder, var_string='dm2', FSA=True, plot=plot_mul
-    )
+if plot_mul:
+    print('\ntheta_min')
+    theta_min, _ = pl_func.fit_MC(
+        var_list=theta_entry, var=r"$\theta_{23}$ $[rad]$",
+        N=N_MC, dir_folder=dir_folder, var_string='theta', FSA=True, plot=plot_mul
+        )
+    print('\ndm2_min')
+    dm2_min, _ = pl_func.fit_MC(
+        var_list=dm2_entry, var=r"$\Delta m_{23}^2$ $[eV^2]$",
+        N=N_MC, dir_folder=dir_folder, var_string='dm2', FSA=True, plot=plot_mul
+        )
 
 # estimate error
 print('\nUncertainties from Hessian')
